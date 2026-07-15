@@ -181,35 +181,23 @@ export class MercadoLivreService {
   async getItemDetails(itemId: string): Promise<any> {
     try {
       this.logger.log(`Fetching item details for ${itemId}`);
-      let token = await this.getValidAccessToken();
+      // Token é removido pois a API pública de itens (de terceiros) rejeita com 403 o token de um App genérico.
       let response = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
         headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Accept': 'application/json'
         }
       });
-
-      if (response.status === 401 || response.status === 403) {
-        token = await this.refreshAccessToken();
-        if (token) {
-          response = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
-        }
-      }
 
       if (!response.ok) {
         const err = await response.text();
         throw new Error(`Failed to fetch item ${itemId}: ${err}`);
       }
 
-      return response.json();
-    } catch (error) {
-      this.logger.error('Error fetching item details:', error);
-      throw error;
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      this.logger.error('Error fetching item details:', e);
+      throw e;
     }
   }
 }
