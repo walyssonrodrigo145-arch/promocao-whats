@@ -122,7 +122,7 @@ export class MercadoLivreService {
   async searchOffers(query: string = 'promoção', limit: number = 5): Promise<any[]> {
     try {
       this.logger.log(`Searching Mercado Livre for offers with query: ${query}`);
-      const token = await this.getValidAccessToken();
+      let token = await this.getValidAccessToken();
       const url = `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=${limit}&condition=new`;
       
       let response = await fetch(url, {
@@ -161,7 +161,7 @@ export class MercadoLivreService {
   async getItemDetails(itemId: string): Promise<any> {
     try {
       this.logger.log(`Fetching item details for ${itemId}`);
-      const token = await this.getValidAccessToken();
+      let token = await this.getValidAccessToken();
       let response = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
         headers: {
           'Accept': 'application/json',
