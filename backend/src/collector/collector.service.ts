@@ -100,24 +100,14 @@ export class CollectorService {
       const price = offer.price;
       const pictures = [{ url: offer.pictureUrl }];
 
-      const message = await this.aiService.generateOfferCopy(title, price, link);
+      const message = await this.aiService.generateCopy({ title, price, permalink: link });
 
       this.logger.log(`Copy generated. Posting to WhatsApp...`);
 
-      // 4. Download Image
-      let base64Image = '';
-      if (pictures && pictures.length > 0) {
-        const imageUrl = pictures[0].url;
-        const imgResponse = await fetch(imageUrl);
-        if (imgResponse.ok) {
-          const buffer = await imgResponse.arrayBuffer();
-          base64Image = Buffer.from(buffer).toString('base64');
-        }
-      }
-
       // 5. Send Message to Evolution API
-      if (base64Image) {
-        await this.evolutionService.sendMediaMessage('WRPROMO', base64Image, 'image/jpeg', 'oferta.jpg', message);
+      if (pictures && pictures.length > 0 && pictures[0].url) {
+        // A Evolution API aceita URL diretamente em mediaUrl
+        await this.evolutionService.sendMediaMessage('WRPROMO', message, pictures[0].url);
       } else {
         await this.evolutionService.sendTextMessage('WRPROMO', message);
       }
