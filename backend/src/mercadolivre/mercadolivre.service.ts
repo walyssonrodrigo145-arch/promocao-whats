@@ -146,40 +146,35 @@ export class MercadoLivreService {
 
   async searchOffers(query: string = 'promoção', limit: number = 5): Promise<any[]> {
     try {
-      this.logger.log(`Searching Mercado Livre for offers with query: ${query}`);
-      let token = await this.getValidAccessToken();
-      const url = `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=${limit}&condition=new`;
+      this.logger.log(`Searching DuckDuckGo for ML offers with query: ${query}`);
+      const ddgUrl = `https://html.duckduckgo.com/html/?q=site:produto.mercadolivre.com.br+${encodeURIComponent(query)}`;
       
-      let response = await fetch(url, {
+      const response = await fetch(ddgUrl, {
         headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
         }
       });
 
-      if (response.status === 401 || response.status === 403) {
-        this.logger.warn('Token seems expired, refreshing...');
-        token = await this.refreshAccessToken();
-        if (token) {
-          response = await fetch(url, {
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
-        }
-      }
-
       if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`Failed to search offers on ML: ${err}`);
+        throw new Error('Failed to fetch from DuckDuckGo');
       }
 
-      const data = await response.json();
-      return data.results;
-    } catch (error) {
-      this.logger.error('Error searching offers:', error);
-      throw error;
+      const html = await response.text();
+      const matches = html.match(/MLB-?\d+/g);
+      
+      if (!matches || matches.length === 0) {
+        return [];
+      }
+
+      // Deduplicate and clean up IDs (ensure format MLB1234)
+      const uniqueIds = [...new Set(matches.map(m => m.replace('-', '')))].slice(0, limit);
+      
+      const offers = uniqueIds.map(id => ({ id }));
+      return offers;
+
+    } catch (e) {
+      this.logger.error('Error searching offers via DuckDuckGo', e);
+      return [];
     }
   }
 
