@@ -33,7 +33,7 @@ Regras:
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama3-70b-8192', // Ou outro modelo disponível na Groq (ex: mixtral-8x7b-32768)
+          model: 'llama-3.1-70b-versatile',
           messages: [
             {
               role: 'user',
