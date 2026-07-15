@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Categoria {
+  id        String    @id @default(uuid())
+  nome      String    @unique
+  produtos  Produto[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Produto {
+  id                 String             @id @default(uuid())
+  titulo             String
+  precoAtual         Float
+  precoOriginal      Float?
+  percentualDesconto Float?
+  imagem             String
+  linkOriginal       String
+  marca              String?
+  loja               String?
+  quantidadeVendida  Int?
+  avaliacao          Float?
+  quantidadeAvaliacoes Int?
+  freteGratis        Boolean            @default(false)
+  mercadoFull        Boolean            @default(false)
+  shopeeMall         Boolean            @default(false)
+  disponibilidade    Boolean            @default(true)
+  dataPromocao       DateTime
+  
+  categoriaId        String?
+  categoria          Categoria?         @relation(fields: [categoriaId], references: [id])
+  
+  promocoes          Promocao[]
+  historicoPrecos    HistoricoPreco[]
+  linksAfiliado      LinkAfiliado[]
+  
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model HistoricoPreco {
+  id        String   @id @default(uuid())
+  produtoId String
+  produto   Produto  @relation(fields: [produtoId], references: [id])
+  preco     Float
+  data      DateTime @default(now())
+}
+
+model Promocao {
+  id          String   @id @default(uuid())
+  produtoId   String
+  produto     Produto  @relation(fields: [produtoId], references: [id])
+  score       Float
+  motivos     String[]
+  enviada     Boolean  @default(false)
+  dataEnvio   DateTime?
+  grupoId     String?
+  grupo       Grupo?   @relation(fields: [grupoId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model LinkAfiliado {
+  id           String   @id @default(uuid())
+  produtoId    String
+  produto      Produto  @relation(fields: [produtoId], references: [id])
+  linkOriginal String
+  linkGerado   String
+  plataforma   String   // 'MERCADOLIVRE' | 'SHOPEE'
+  cliques      Clique[]
+  createdAt    DateTime @default(now())
+}
+
+model Grupo {
+  id        String     @id @default(uuid())
+  nome      String
+  jid       String     @unique // WhatsApp JID
+  ativo     Boolean    @default(true)
+  promocoes Promocao[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Config {
+  id        String   @id @default(uuid())
+  chave     String   @unique
+  valor     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  nivel     String   // 'INFO' | 'ERROR' | 'WARN'
+  mensagem  String
+  detalhes  String?
+  createdAt DateTime @default(now())
+}
+
+model Estatistica {
+  id              String   @id @default(uuid())
+  data            DateTime @unique @default(now())
+  promocoesEnviadas Int    @default(0)
+  receitaEstimada Float    @default(0.0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Clique {
+  id             String       @id @default(uuid())
+  linkAfiliadoId String
+  linkAfiliado   LinkAfiliado @relation(fields: [linkAfiliadoId], references: [id])
+  ip             String?
+  userAgent      String?
+  createdAt      DateTime     @default(now())
+}
+
+model Conversao {
+  id            String   @id @default(uuid())
+  codigoPedido  String   @unique
+  plataforma    String
+  valorComissao Float
+  createdAt     DateTime @default(now())
+}
