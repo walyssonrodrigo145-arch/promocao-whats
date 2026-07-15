@@ -33,7 +33,8 @@ conn.on('ready', async () => {
     await new Promise((resolve, reject) => {
       conn.sftp((err, sftp) => {
         if (err) return reject(err);
-        sftp.fastPut('./backend/.env', '/root/promocao-whats/backend/.env', (err) => {
+        const envPath = path.join(__dirname, '../backend/.env');
+        sftp.fastPut(envPath, '/root/promocao-whats/backend/.env', (err) => {
           if (err) return reject(err);
           console.log('✅ Arquivo .env enviado com sucesso!');
           resolve();

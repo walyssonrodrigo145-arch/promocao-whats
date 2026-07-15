@@ -1,0 +1,1 @@
+fetch('https://promo.wrmusicpro.com.br/api/message/test', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({jid: '120363427056717824@g.us'})}).then(r=>r.text()).then(console.log);
