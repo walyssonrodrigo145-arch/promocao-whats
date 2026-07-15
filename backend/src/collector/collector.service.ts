@@ -26,21 +26,40 @@ export class CollectorService {
   }
 
   // Método que orquestra: ML -> AI -> WhatsApp
-  async collectAndPostOffer(query: string = 'promoção relâmpago') {
+  async collectAndPostOffer(query: string = 'promoção', url?: string) {
     try {
-      this.logger.log('Fetching offers from Mercado Livre...');
-      const offers = await this.mlService.searchOffers(query, 5);
+      let item = null;
 
-      if (!offers || offers.length === 0) {
-        this.logger.warn('No offers found.');
-        return;
+      if (url) {
+        this.logger.log(`Processing URL directly: ${url}`);
+        const itemId = await this.mlService.resolveUrlAndGetItemId(url);
+        if (itemId) {
+          this.logger.log(`Resolved Item ID: ${itemId}`);
+          item = await this.mlService.getItemDetails(itemId);
+        } else {
+          this.logger.warn(`Could not resolve Item ID from URL: ${url}`);
+          return;
+        }
+      } else {
+        this.logger.log('Fetching offers from Mercado Livre via search...');
+        const offers = await this.mlService.searchOffers(query, 1);
+        
+        if (!offers || offers.length === 0) {
+          this.logger.warn('No offers found for query:', query);
+          return;
+        }
+
+        const offer = offers[0];
+        item = await this.mlService.getItemDetails(offer.id);
       }
 
-      // Pega a primeira oferta para postar
-      const topOffer = offers[0];
+      if (!item) {
+        this.logger.warn('Could not fetch item details.');
+        return;
+      }
       
       // Detalhes completos (para pegar imagem melhor)
-      const itemDetails = await this.mlService.getItemDetails(topOffer.id);
+      const itemDetails = item;
 
       // Obter imagem principal (a primeira foto)
       const imageUrl = itemDetails.pictures && itemDetails.pictures.length > 0 

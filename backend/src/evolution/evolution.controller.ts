@@ -70,4 +70,31 @@ export class EvolutionController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Post('webhook')
+  async handleWebhook(@Body() body: any) {
+    try {
+      if (body.event === 'messages.upsert' && body.data) {
+        const messages = body.data.messages || [];
+        if (messages.length === 0) return { success: true };
+
+        const msg = messages[0];
+        
+        if (msg.key.fromMe || msg.key.remoteJid === 'status@broadcast') return { success: true };
+
+        const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+        
+        if (text.includes('mercadolivre.com') || text.includes('mlb.com')) {
+          console.log('Detected Mercado Livre Link via Webhook!');
+          
+          // Dispara o nosso Collector, que vai processar e jogar no grupo!
+          fetch('http://localhost:3000/collector/trigger?url=' + encodeURIComponent(text), { method: 'POST' }).catch(e => console.error(e));
+        }
+      }
+    } catch(e) {
+      console.error('Webhook error:', e);
+    }
+    
+    return { success: true };
+  }
 }

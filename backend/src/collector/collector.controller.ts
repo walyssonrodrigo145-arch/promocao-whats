@@ -6,9 +6,12 @@ export class CollectorController {
   constructor(private readonly collectorService: CollectorService) {}
 
   @Post('trigger')
-  async triggerCollection(@Query('q') query: string) {
+  async triggerCollection(@Query('q') q?: string, @Query('url') url?: string) {
     // Roda em background
-    this.collectorService.collectAndPostOffer(query || 'promoção relâmpago').catch(console.error);
+    this.collectorService.collectAndPostOffer(q, url).catch(err => {
+      console.error('Error in background collection:', err);
+    });
+    
     return { success: true, message: 'Collection triggered in background.' };
   }
 }

@@ -119,6 +119,31 @@ export class MercadoLivreService {
     }
   }
 
+  async resolveUrlAndGetItemId(url: string): Promise<string | null> {
+    try {
+      let finalUrl = url;
+      // Se for URL curta, segue o redirect
+      if (url.includes('/sec/')) {
+        const response = await fetch(url, { redirect: 'manual', headers: {'User-Agent': 'Mozilla/5.0'} });
+        if (response.status >= 300 && response.status < 400) {
+          finalUrl = response.headers.get('location') || url;
+        } else if (response.status === 404) {
+          // as vezes ML retorna 404 no manual redirect mas com a location no html ou headers
+           finalUrl = response.headers.get('location') || url;
+        }
+      }
+      
+      const match = finalUrl.match(/MLB-?(\d+)/i);
+      if (match) {
+        return `MLB${match[1]}`;
+      }
+      return null;
+    } catch (e) {
+      this.logger.error('Failed to resolve URL', e);
+      return null;
+    }
+  }
+
   async searchOffers(query: string = 'promoção', limit: number = 5): Promise<any[]> {
     try {
       this.logger.log(`Searching Mercado Livre for offers with query: ${query}`);
