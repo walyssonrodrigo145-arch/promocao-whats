@@ -84,9 +84,47 @@ export class CollectorService {
         await this.evolutionService.sendTextMessage(this.TARGET_GROUP_JID, copy);
       }
 
-      this.logger.log('Offer successfully posted!');
+      this.logger.log('Collect and post routine completed.');
     } catch (error) {
-      this.logger.error('Error during collect and post routine:', error);
+      this.logger.error('Error during collect and post routine:');
+      this.logger.error(error);
+    }
+  }
+
+  async processDirectOffer(offer: { id: string, title: string, price: number, permalink: string, pictureUrl: string }) {
+    try {
+      this.logger.log(`Processing direct offer received from scraper: ${offer.title}`);
+      
+      const link = offer.permalink;
+      const title = offer.title;
+      const price = offer.price;
+      const pictures = [{ url: offer.pictureUrl }];
+
+      const message = await this.aiService.generateOfferCopy(title, price, link);
+
+      this.logger.log(`Copy generated. Posting to WhatsApp...`);
+
+      // 4. Download Image
+      let base64Image = '';
+      if (pictures && pictures.length > 0) {
+        const imageUrl = pictures[0].url;
+        const imgResponse = await fetch(imageUrl);
+        if (imgResponse.ok) {
+          const buffer = await imgResponse.arrayBuffer();
+          base64Image = Buffer.from(buffer).toString('base64');
+        }
+      }
+
+      // 5. Send Message to Evolution API
+      if (base64Image) {
+        await this.evolutionService.sendMediaMessage('WRPROMO', base64Image, 'image/jpeg', 'oferta.jpg', message);
+      } else {
+        await this.evolutionService.sendTextMessage('WRPROMO', message);
+      }
+
+      this.logger.log('Direct offer successfully processed and posted.');
+    } catch (e) {
+      this.logger.error('Error during processDirectOffer:', e);
     }
   }
 }
