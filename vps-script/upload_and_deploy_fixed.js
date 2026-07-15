@@ -29,19 +29,14 @@ conn.on('ready', async () => {
   console.log('Conexão SSH estabelecida com sucesso!');
   try {
     console.log('--- Fazendo Upload do arquivo .env (Segurança) ---');
+    await runCommand('mkdir -p /root/promocao-whats/backend');
     await new Promise((resolve, reject) => {
       conn.sftp((err, sftp) => {
         if (err) return reject(err);
-        
-        // Ensure directory exists before upload
-        conn.exec('mkdir -p /root/promocao-whats/backend', (err, stream) => {
-          stream.on('close', () => {
-             sftp.fastPut('./backend/.env', '/root/promocao-whats/backend/.env', (err) => {
-                if (err) return reject(err);
-                console.log('✅ Arquivo .env enviado com sucesso!');
-                resolve();
-             });
-          });
+        sftp.fastPut('./backend/.env', '/root/promocao-whats/backend/.env', (err) => {
+          if (err) return reject(err);
+          console.log('✅ Arquivo .env enviado com sucesso!');
+          resolve();
         });
       });
     });
