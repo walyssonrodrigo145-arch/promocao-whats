@@ -82,18 +82,19 @@ export class MercadoLivreService {
   async searchOffers(query: string = 'promoção', limit: number = 5): Promise<any[]> {
     try {
       this.logger.log(`Searching Mercado Livre for offers with query: ${query}`);
-      // Busca produtos pelo termo. Idealmente buscaríamos deals (ofertas do dia),
-      // mas a API aberta de search com termo funciona muito bem.
+      const token = await this.getValidAccessToken();
       const url = `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=${limit}&condition=new`;
       
       const response = await fetch(url, {
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
 
       if (!response.ok) {
-        throw new Error('Failed to search offers on ML');
+        const err = await response.text();
+        throw new Error(`Failed to search offers on ML: ${err}`);
       }
 
       const data = await response.json();
@@ -107,14 +108,17 @@ export class MercadoLivreService {
   async getItemDetails(itemId: string): Promise<any> {
     try {
       this.logger.log(`Fetching item details for ${itemId}`);
+      const token = await this.getValidAccessToken();
       const response = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
         headers: {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch item ${itemId}`);
+        const err = await response.text();
+        throw new Error(`Failed to fetch item ${itemId}: ${err}`);
       }
 
       return response.json();
