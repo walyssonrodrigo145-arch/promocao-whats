@@ -95,9 +95,7 @@ export class EvolutionService {
             delay: 1200,
             presence: 'composing',
           },
-          textMessage: {
-            text: text,
-          },
+          text: text,
         }),
       });
 
