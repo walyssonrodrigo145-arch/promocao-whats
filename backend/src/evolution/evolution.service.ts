@@ -111,4 +111,36 @@ export class EvolutionService {
       throw error;
     }
   }
+
+  async sendMediaMessage(jid: string, caption: string, mediaUrl: string, instanceName: string = this.defaultInstance) {
+    try {
+      this.logger.log(`Sending media message to ${jid} via instance ${instanceName}`);
+      const response = await fetch(`${this.apiUrl}/message/sendMedia/${instanceName}`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          number: jid,
+          mediatype: "image",
+          mimetype: "image/jpeg",
+          caption: caption,
+          media: mediaUrl,
+          options: {
+            delay: 1200,
+            presence: 'composing',
+          }
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send media message');
+      }
+
+      return data;
+    } catch (error) {
+      this.logger.error(`Error sending media message to ${jid}:`, error);
+      throw error;
+    }
+  }
 }
