@@ -10,6 +10,7 @@ import { AffiliatesModule } from './affiliates/affiliates.module';
 import { MessageModule } from './message/message.module';
 import { EvolutionModule } from './evolution/evolution.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { MercadoLivreModule } from './mercadolivre/mercadolivre.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { PrismaModule } from './prisma/prisma.module';
     AiModule, 
     AffiliatesModule, 
     MessageModule, 
-    EvolutionModule
+    EvolutionModule,
+    MercadoLivreModule
   ],
   controllers: [AppController],
   providers: [AppService],
