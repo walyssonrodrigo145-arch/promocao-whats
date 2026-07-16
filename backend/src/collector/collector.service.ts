@@ -193,4 +193,85 @@ export class CollectorService {
       this.logger.error('Error during processDirectOffer:', e);
     }
   }
+
+  // --- LABORATORY METHODS ---
+
+  async analyzeManualOffer(url: string) {
+    this.logger.log(`[Laboratory] Analyzing manual URL: ${url}`);
+    const itemId = await this.mlService.resolveUrlAndGetItemId(url);
+    if (!itemId) {
+      throw new Error(`Could not resolve ML Item ID from URL: ${url}`);
+    }
+
+    const itemDetails = await this.mlService.getItemDetails(itemId);
+    if (!itemDetails) {
+      throw new Error(`Could not fetch details for item ID: ${itemId}`);
+    }
+
+    const imageUrl = (itemDetails.pictures && itemDetails.pictures.length > 0) 
+                     ? itemDetails.pictures[0].url 
+                     : itemDetails.thumbnail;
+
+    const productInfo = {
+      title: itemDetails.title,
+      price: itemDetails.price,
+      permalink: url, // maintain the affiliate link
+      image: imageUrl
+    };
+
+    const analysisJson = await this.aiService.analyzeProduct(productInfo);
+    
+    // Inject extra fields needed for the frontend display and later publishing
+    return {
+      ...analysisJson,
+      _raw: {
+        title: productInfo.title,
+        price: productInfo.price,
+        link: productInfo.permalink,
+        image: imageUrl
+      }
+    };
+  }
+
+  async publishManualOffer(analysisData: any) {
+    this.logger.log(`[Laboratory] Publishing manual offer: ${analysisData._raw.title}`);
+    
+    const message = await this.aiService.generateCopy(analysisData);
+    const { title, price, link, image } = analysisData._raw;
+
+    if (image) {
+      await this.evolutionService.sendMediaMessage(this.TARGET_GROUP_JID, message, image);
+    } else {
+      await this.evolutionService.sendTextMessage(this.TARGET_GROUP_JID, message);
+    }
+
+    const dbProduct = await this.prisma.produto.create({
+      data: {
+        titulo: title,
+        precoAtual: price,
+        imagem: image || '',
+        linkOriginal: link,
+        dataPromocao: new Date(),
+        nicho: analysisData?.nicho || null,
+        publicoAlvo: analysisData?.publico_alvo || null,
+        intencaoCompra: analysisData?.intencao_compra || null,
+        score: analysisData?.score ? parseInt(analysisData.score) : null,
+        prioridade: analysisData?.prioridade || null,
+        gatilhos: analysisData?.gatilhos || [],
+        beneficios: analysisData?.beneficios || [],
+        doresResolvidas: analysisData?.dores_resolvidas || [],
+        palavrasImpacto: analysisData?.palavras_impacto || [],
+        linksAfiliado: {
+          create: {
+            linkOriginal: link,
+            linkGerado: link,
+            plataforma: 'MERCADOLIVRE'
+          }
+        }
+      }
+    });
+
+    this.logger.log(`[Laboratory] Published and saved to DB with ID: ${dbProduct.id}`);
+    return { success: true, productId: dbProduct.id };
+  }
 }

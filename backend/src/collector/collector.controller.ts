@@ -23,4 +23,22 @@ export class CollectorController {
     
     return { success: true, message: 'Offer received and processing triggered.' };
   }
+
+  @Post('laboratory/analyze')
+  async analyzeManualOffer(@Body() body: { url: string }) {
+    if (!body.url) {
+      return { success: false, message: 'URL is required' };
+    }
+    const analysis = await this.collectorService.analyzeManualOffer(body.url);
+    return { success: true, analysis };
+  }
+
+  @Post('laboratory/publish')
+  async publishManualOffer(@Body() body: { analysis: any }) {
+    if (!body.analysis) {
+      return { success: false, message: 'Analysis data is required' };
+    }
+    const result = await this.collectorService.publishManualOffer(body.analysis);
+    return result;
+  }
 }
