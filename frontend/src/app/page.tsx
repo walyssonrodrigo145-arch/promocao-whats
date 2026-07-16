@@ -4,6 +4,8 @@ import { Sidebar } from '@/components/Sidebar';
 import { ProductCard } from '@/components/ProductCard';
 import { BadgePercent, ShieldCheck, Tag } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 async function getProducts() {
   try {
     const res = await fetch("http://api:3000/products", { 

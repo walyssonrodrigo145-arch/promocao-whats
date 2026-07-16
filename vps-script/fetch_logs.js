@@ -11,7 +11,7 @@ const config = {
 };
 
 conn.on('ready', () => {
-  conn.exec('docker logs --tail 100 musicpro-ofertas-api', (err, stream) => {
+  conn.exec('docker exec musicpro-ofertas-web wget -qO- http://api:3000/products', (err, stream) => {
     if (err) throw err;
     stream.on('close', (code, signal) => {
       conn.end();
