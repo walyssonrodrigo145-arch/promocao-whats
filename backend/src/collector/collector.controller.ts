@@ -1,4 +1,4 @@
-import { Controller, Post, Query, Body } from '@nestjs/common';
+import { Controller, Post, Query, Body, Get } from '@nestjs/common';
 import { CollectorService } from './collector.service';
 
 @Controller('collector')
