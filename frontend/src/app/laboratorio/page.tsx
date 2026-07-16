@@ -15,6 +15,11 @@ export default function Laboratorio() {
     e.preventDefault();
     if (!url) return;
     
+    if (url.includes('meli.la') || url.includes('/sec/')) {
+      alert("⚠️ Atenção: O Mercado Livre bloqueia a leitura de links encurtados (meli.la ou /sec/) direto pelo servidor. Por favor, copie o LINK LONGO oficial do produto (que contém MLB) e cole aqui no Laboratório.");
+      return;
+    }
+    
     setLoading(true);
     setAnalysis(null);
     setPublished(false);
