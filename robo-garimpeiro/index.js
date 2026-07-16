@@ -289,8 +289,10 @@ async function processLaboratoryTask(task) {
   let browser;
   try {
     browser = await puppeteer.launch({
-      headless: "new",
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: false, // Mostrar a janela para você acompanhar a mágica
+      defaultViewport: null,
+      userDataDir: './perfil_chrome_robo',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
     });
     
     const page = await browser.newPage();
@@ -299,24 +301,61 @@ async function processLaboratoryTask(task) {
     console.log(`[LABORATÓRIO] Acessando link: ${task.url}`);
     await page.goto(task.url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-    // Se for vitrine (meli.la -> social), clica no primeiro produto
+    // Se for vitrine (meli.la -> social), clica no produto principal
     if (page.url().includes('/social/')) {
-        console.log(`[LABORATÓRIO] Detectada vitrine (/social/). Acessando o primeiro produto...`);
-        const firstProduct = await page.$('.poly-card__content a');
-        if (firstProduct) {
-           await Promise.all([
-              page.waitForNavigation({ waitUntil: 'networkidle2' }),
-              firstProduct.click()
-           ]);
+        console.log(`[LABORATÓRIO] Detectada vitrine (/social/). Procurando botão 'Ir para produto'...`);
+        
+        // Tenta achar o botão azul "Ir para produto"
+        const btnIrParaProduto = await page.$('::-p-xpath(//a[contains(., "Ir para produto")] | //button[contains(., "Ir para produto")])');
+        
+        if (btnIrParaProduto) {
+           console.log(`[LABORATÓRIO] Botão 'Ir para produto' encontrado! Redirecionando...`);
+           const href = await page.evaluate(el => el.href, btnIrParaProduto);
+           if (href) {
+               await page.goto(href, { waitUntil: 'networkidle2', timeout: 30000 });
+           } else {
+               await Promise.all([
+                  page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
+                  btnIrParaProduto.click()
+               ]);
+           }
+        } else {
+           console.log(`[LABORATÓRIO] Botão não encontrado. Acessando o primeiro produto da lista...`);
+           const firstProduct = await page.$('.poly-card__content a');
+           if (firstProduct) {
+              const pHref = await page.evaluate(el => el.href, firstProduct);
+              if (pHref) {
+                  await page.goto(pHref, { waitUntil: 'networkidle2', timeout: 30000 });
+              } else {
+                  await Promise.all([
+                     page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
+                     firstProduct.click()
+                  ]);
+              }
+           }
         }
     }
 
     const data = await page.evaluate(() => {
        const title = document.querySelector('.ui-pdp-title')?.innerText || '';
-       const priceStr = document.querySelector('.andes-money-amount__fraction')?.innerText || '0';
-       const price = parseFloat(priceStr.replace(/\./g, ''));
+       
+       // Estratégia 1: Tentar pegar o preço exato do Meta Tag (Schema.org)
+       let priceMeta = document.querySelector('meta[itemprop="price"]')?.content;
+       let price = parseFloat(priceMeta);
+       
+       // Estratégia 2: Pegar da div principal de preço promocional (ignorando o valor original riscado)
+       if (!price || isNaN(price)) {
+           const priceStr = document.querySelector('.ui-pdp-price__second-line .andes-money-amount__fraction')?.innerText || 
+                            document.querySelector('.andes-money-amount__fraction')?.innerText || '0';
+           price = parseFloat(priceStr.replace(/\./g, ''));
+       }
+
+       // Estratégia 3: Pegar o valor original riscado (se houver)
+       const originalPriceStr = document.querySelector('.ui-pdp-price__original-value .andes-money-amount__fraction')?.innerText;
+       let originalPrice = originalPriceStr ? parseFloat(originalPriceStr.replace(/\./g, '')) : null;
+
        const img = document.querySelector('.ui-pdp-gallery__figure__image')?.src || '';
-       return { title, price, pictureUrl: img };
+       return { title, price, originalPrice, pictureUrl: img };
     });
 
     console.log(`[LABORATÓRIO] Dados extraídos: ${data.title} (R$ ${data.price})`);

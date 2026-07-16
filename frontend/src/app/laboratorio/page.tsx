@@ -158,7 +158,9 @@ export default function Laboratorio() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-2xl font-black text-emerald-400">R$ {analysis._raw?.price}</p>
-                  <p className="text-sm text-zinc-500 line-through">De: {analysis.preco_antigo}</p>
+                  {(analysis._raw?.originalPrice || analysis.preco_antigo) && (
+                    <p className="text-sm text-zinc-500 line-through">De: R$ {analysis._raw?.originalPrice || analysis.preco_antigo}</p>
+                  )}
                 </div>
               </div>
             </div>
