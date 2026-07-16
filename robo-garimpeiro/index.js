@@ -233,12 +233,12 @@ async function runScraper() {
 // Configuração do Agendador (Cron)
 // Padrão do cron: "Minuto Hora Dia Mes Dia_da_semana"
 const SCHEDULE_REGULAR = '0 8,10,12,14,16,18,20 * * *';
-const SCHEDULE_TESTE = '10 0 * * *'; // Horário de teste (00:10)
+const SCHEDULE_TESTE = '15 0 * * *'; // Horário de teste (00:15)
 
 console.log('====================================================');
 console.log('🕒 ROBÔ GARIMPEIRO ATIVADO NO MODO 24/7');
 console.log('📅 Horários agendados: 08h, 10h, 12h, 14h, 16h, 18h e 20h');
-console.log('🛠️  Horário extra de teste ativado: 00:10');
+console.log('🛠️  Horário extra de teste ativado: 00:15');
 console.log('⚠️  Deixe esta janela preta aberta (se fechar, ele para de rodar).');
 console.log('====================================================\n');
 console.log('💤 Aguardando pacientemente o próximo horário...');
@@ -248,7 +248,7 @@ cron.schedule(SCHEDULE_REGULAR, () => {
 });
 
 cron.schedule(SCHEDULE_TESTE, () => {
-  console.log('⏰ Horário de TESTE atingido (00:10)! Iniciando...');
+  console.log('⏰ Horário de TESTE atingido (00:15)! Iniciando...');
   runScraper();
 });
 

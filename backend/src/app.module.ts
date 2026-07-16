@@ -11,6 +11,7 @@ import { MessageModule } from './message/message.module';
 import { EvolutionModule } from './evolution/evolution.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { MercadoLivreModule } from './mercadolivre/mercadolivre.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { MercadoLivreModule } from './mercadolivre/mercadolivre.module';
     AffiliatesModule, 
     MessageModule, 
     EvolutionModule,
-    MercadoLivreModule
+    MercadoLivreModule,
+    ProductsModule
   ],
   controllers: [AppController],
   providers: [AppService],

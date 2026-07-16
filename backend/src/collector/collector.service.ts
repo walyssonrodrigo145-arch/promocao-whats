@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { MercadoLivreService } from '../mercadolivre/mercadolivre.service';
 import { AiService } from '../ai/ai.service';
 import { EvolutionService } from '../evolution/evolution.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CollectorService {
@@ -15,7 +16,8 @@ export class CollectorService {
   constructor(
     private readonly mlService: MercadoLivreService,
     private readonly aiService: AiService,
-    private readonly evolutionService: EvolutionService
+    private readonly evolutionService: EvolutionService,
+    private readonly prisma: PrismaService
   ) {}
 
   // A cada 4 horas
@@ -129,6 +131,29 @@ export class CollectorService {
         await this.evolutionService.sendMediaMessage(this.TARGET_GROUP_JID, message, imageUrl);
       } else {
         await this.evolutionService.sendTextMessage(this.TARGET_GROUP_JID, message);
+      }
+
+      // 6. Salvar no Banco de Dados (Para a Lojinha Virtual)
+      try {
+        const dbProduct = await this.prisma.produto.create({
+          data: {
+            titulo: title,
+            precoAtual: price,
+            imagem: imageUrl || '',
+            linkOriginal: link, // Usando o link reduzido
+            dataPromocao: new Date(),
+            linksAfiliado: {
+              create: {
+                linkOriginal: link,
+                linkGerado: link,
+                plataforma: 'MERCADOLIVRE'
+              }
+            }
+          }
+        });
+        this.logger.log(`Product saved to database with ID: ${dbProduct.id}`);
+      } catch (dbError) {
+        this.logger.error(`Failed to save product to DB: ${dbError.message}`);
       }
 
       this.logger.log('Direct offer successfully processed and posted.');
