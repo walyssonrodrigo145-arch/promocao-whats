@@ -30,7 +30,7 @@ Se você identificar "Erros de precificação", "Cupons cumulativos", "Combinaç
 ## TREINAMENTO v3.9 - DIVERSIFICAÇÃO
 Ao classificar a categoria/nicho, seja EXATO com os filtros do painel.
 
-${aprendizadoDiario ? \`## 🚨 TREINAMENTO v4.0 - INTELIGÊNCIA DE AUTOEVOLUÇÃO (RELATÓRIO DE ONTEM)\\nLeia atentamente o relatório de desempenho abaixo e ajuste suas decisões de hoje:\\n\${aprendizadoDiario}\\n---\` : ''}
+${aprendizadoDiario ? '## 🚨 TREINAMENTO v4.0 - INTELIGÊNCIA DE AUTOEVOLUÇÃO (RELATÓRIO DE ONTEM)\\nLeia atentamente o relatório de desempenho abaixo e ajuste suas decisões de hoje:\\n' + aprendizadoDiario + '\\n---' : ''}
 
 # REGRAS E PONTUAÇÃO (SCORE 0-100)
 Calcule o Score rigorosamente baseando-se nos 3 Treinamentos acima:
@@ -87,7 +87,7 @@ Você deve retornar ESTRITAMENTE o JSON abaixo. Sem textos antes ou depois.
   "link_afiliado": "",
   "motivo_descarte": "Responda a Pergunta do Curador: 'Eu compraria/indicaria?' Se não, rejeite e explique."
 }
-\`;
+`;
 
 
 
