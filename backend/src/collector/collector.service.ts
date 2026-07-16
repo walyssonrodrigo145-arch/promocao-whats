@@ -144,7 +144,14 @@ export class CollectorService {
       }
 
       this.logger.log('Step 2: Generating AI Copy (Pipeline Stage 2)...');
-      const message = await this.aiService.generateCopy(analysisJson);
+      let message = await this.aiService.generateCopy(analysisJson);
+      
+      // Inject actual affiliate link replacing placeholder, or append if missing
+      if (message.includes('{{LINK_AFILIADO}}')) {
+        message = message.replace('{{LINK_AFILIADO}}', link);
+      } else {
+        message = message + '\n\n👉 Confira aqui: ' + link;
+      }
 
       this.logger.log(`Copy generated. Posting to WhatsApp...`);
 
@@ -293,8 +300,14 @@ export class CollectorService {
   async publishManualOffer(analysisData: any) {
     this.logger.log(`[Laboratory] Publishing manual offer: ${analysisData._raw.title}`);
     
-    const message = await this.aiService.generateCopy(analysisData);
+    let message = await this.aiService.generateCopy(analysisData);
     const { title, price, link, image } = analysisData._raw;
+
+    if (message.includes('{{LINK_AFILIADO}}')) {
+      message = message.replace('{{LINK_AFILIADO}}', link);
+    } else {
+      message = message + '\n\n👉 Confira aqui: ' + link;
+    }
 
     if (image) {
       await this.evolutionService.sendMediaMessage(this.TARGET_GROUP_JID, message, image);
