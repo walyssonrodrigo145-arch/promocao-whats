@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const cron = require('node-cron');
 const fs = require('fs');
+const { avaliarOferta } = require('./ai_garimpeiro.js');
 puppeteer.use(StealthPlugin());
 
 const VPS_ENDPOINT = 'https://promo.wrmusicpro.com.br/collector/receive-offer';
@@ -97,12 +98,12 @@ async function runScraper() {
                   title = img.alt || "Oferta Imperdível";
               }
               
-              // Tenta pegar o preço exato usando seletores precisos do ML
-              const currentPriceEl = card.querySelector('.poly-price__current .andes-money-amount__fraction, .andes-price-display__fraction, .andes-money-amount__fraction');
-              if (currentPriceEl) {
-                  const numStr = currentPriceEl.innerText.replace(/\./g, '');
-                  const p = parseFloat(numStr);
-                  if (!isNaN(p) && p > 0) price = p;
+              // Pega todos os preços no card e escolhe o menor (promocional)
+              const priceElements = card.querySelectorAll('.andes-money-amount__fraction');
+              if (priceElements.length > 0) {
+                  let prices = Array.from(priceElements).map(el => parseFloat(el.innerText.replace(/\./g, '')));
+                  let minPrice = Math.min(...prices.filter(p => p > 0));
+                  if (minPrice && minPrice > 0) price = minPrice;
               }
 
               // Busca textos na caixa para achar o título (geralmente texto > 15 chars)
@@ -151,8 +152,8 @@ async function runScraper() {
 
         await currentButtons[currentIndex].click();
         
-        // Aguarda a resposta da rede gerar o link
-        for (let j = 0; j < 10; j++) {
+        // Aguarda a resposta da rede gerar o link (aumentado para 6 segundos)
+        for (let j = 0; j < 15; j++) {
             await new Promise(r => setTimeout(r, 400));
             if (interceptedLink) break;
         }
@@ -161,7 +162,7 @@ async function runScraper() {
 
         let finalLink = interceptedLink;
 
-        // Fallback: Se a rede falhar, tentaremos copiar via botão (que também já deve estar na tela agora)
+        // Fallback 1: Extrair do botão Copiar
         if (!finalLink) {
            console.log("⚠️ Link não encontrado na rede. Tentando extrair do botão Copiar...");
            const copyButtons = await page.$$('::-p-xpath(//button[contains(., "Copiar link")])');
@@ -174,22 +175,159 @@ async function runScraper() {
            }
         }
 
+        // Fallback 2: Tentar ler direto de qualquer caixa de texto (input) que tenha o link gerado na tela
+        if (!finalLink) {
+           finalLink = await page.evaluate(() => {
+               const inputs = document.querySelectorAll('input');
+               for (let input of inputs) {
+                   if (input.value && (input.value.includes('meli.la') || input.value.includes('mercadolivre.com.br/sec'))) {
+                       return input.value;
+                   }
+               }
+               return null;
+           });
+        }
+
         if (!finalLink || !finalLink.includes('http')) {
            console.log("❌ Falha crítica: O link não pôde ser gerado ou copiado.");
            await page.keyboard.press('Escape');
            continue;
         }
 
+        console.log(`🔗 Link de Afiliado Capturado: ${finalLink}`);
+        console.log('🕵️‍♂️ Acessando a página do produto para extrair dados avançados...');
+        
+        const productTab = await browser.newPage();
+        await productTab.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        console.log("🔗 Acessando a página do produto para extrair dados avançados...");
+        await productTab.goto(finalLink, { waitUntil: 'networkidle2', timeout: 60000 });
+
+        // Bypass da tela "Preview do Afiliado" (onde aparece o botão azul "Ir para produto")
+        try {
+            const btnIrParaProduto = await productTab.$('::-p-xpath(//button[contains(., "Ir para produto") or contains(., "Ir para o produto")] | //a[contains(., "Ir para produto") or contains(., "Ir para o produto")])');
+            if (btnIrParaProduto) {
+                console.log("⏭️ Bypass da tela do afiliado. Clicando em 'Ir para produto'...");
+                await Promise.all([
+                    productTab.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 }).catch(() => {}),
+                    btnIrParaProduto.click()
+                ]);
+            }
+        } catch (e) {
+            // Ignora se não achar o botão, significa que já está na página do produto
+        }
+        
+        let detailedData = { title: productInfo.title, price: productInfo.price, pictureUrl: productInfo.pictureUrl };
+        try {
+            await productTab.waitForSelector('.ui-pdp-title', { timeout: 10000 }).catch(() => {});
+            
+            const extraData = await productTab.evaluate(() => {
+                const title = document.querySelector('.ui-pdp-title')?.innerText || '';
+                
+                // 1. Tentar pegar o preço exato da Meta Tag (mais seguro)
+                let price = null;
+                let priceMeta = document.querySelector('meta[itemprop="price"]')?.content;
+                if (priceMeta) {
+                    price = parseFloat(priceMeta);
+                } else {
+                    const priceStr = document.querySelector('.ui-pdp-price__second-line .andes-money-amount__fraction')?.innerText || 
+                                     document.querySelector('.andes-money-amount__fraction')?.innerText || '0';
+                    if (priceStr) price = parseFloat(priceStr.replace(/\\./g, ''));
+                }
+
+                // 2. Preço Original Riscado
+                let originalPrice = null;
+                let discountPercentage = 0;
+                const origNode = document.querySelector('s.andes-money-amount') || document.querySelector('.ui-pdp-price__original-value.andes-money-amount');
+                if (origNode) {
+                    const frac = origNode.querySelector('.andes-money-amount__fraction')?.innerText.replace(/\\./g, '') || '0';
+                    originalPrice = parseFloat(frac);
+                }
+                
+                // 3. Desconto
+                const discountNode = document.querySelector('.ui-pdp-price__main-container .ui-pdp-label-as-pill');
+                if (discountNode && discountNode.innerText.includes('%')) {
+                    discountPercentage = parseInt(discountNode.innerText.replace(/[^0-9]/g, ''));
+                } else if (originalPrice && price && originalPrice > price) {
+                    // Calcula manualmente se não tiver a pílula
+                    discountPercentage = Math.round((1 - (price / originalPrice)) * 100);
+                }
+
+                // 4. Avaliações (Tenta múltiplos seletores comuns do ML)
+                let rating = null;
+                let reviewCount = 0;
+                const ratingEl = document.querySelector('.ui-pdp-reviews__rating, .ui-pdp-review__rating');
+                if (ratingEl) rating = parseFloat(ratingEl.innerText.replace(',', '.'));
+                
+                const reviewsEl = document.querySelector('.ui-pdp-review__amount, .ui-pdp-review__label');
+                if (reviewsEl) reviewCount = parseInt(reviewsEl.innerText.replace(/[^0-9]/g, ''));
+
+                // 5. Quantidade Vendida
+                let soldQuantityStr = '';
+                const soldEl = document.querySelector('.ui-pdp-subtitle');
+                if (soldEl && soldEl.innerText.toLowerCase().includes('vendido')) {
+                    soldQuantityStr = soldEl.innerText;
+                }
+
+                let storeReputation = '';
+                const storeInfoEl = document.querySelector('.ui-pdp-seller__link-trigger');
+                if (storeInfoEl) storeReputation += storeInfoEl.innerText + " ";
+                const badgeEl = document.querySelector('.ui-pdp-seller__header__subtitle');
+                if (badgeEl) storeReputation += badgeEl.innerText;
+
+                let freeShipping = !!document.querySelector('.ui-pdp-color--GREEN.ui-pdp-family--SEMIBOLD');
+                let pillText = document.querySelector('.ui-pdp-promotions-pill-label')?.innerText || '';
+                let coupon = pillText.toLowerCase().includes('cupom') ? pillText : null;
+
+                let installments = document.querySelector('.ui-pdp-price__subtitles')?.innerText || '';
+
+                const pictureUrl = document.querySelector('.ui-pdp-gallery__figure__image')?.src || '';
+
+                return { 
+                    title, price, originalPrice, discountPercentage, 
+                    rating, reviewCount, soldQuantityStr, storeReputation, 
+                    freeShipping, coupon, installments, pictureUrl 
+                };
+            });
+            detailedData = { ...detailedData, ...extraData };
+        } catch (e) {
+            console.log("⚠️ Erro ao raspar página do produto, usando dados parciais.");
+        } finally {
+            await productTab.close();
+        }
+        
+        detailedData.permalink = finalLink;
+        
+        console.log(`🤖 Analisando oferta com a IA Groq: ${detailedData.title}...`);
+        const avaliacaoIA = await avaliarOferta(detailedData);
+        
+        if (!avaliacaoIA) {
+            console.log("❌ Falha na IA. Pulando oferta.");
+            await page.keyboard.press('Escape');
+            continue;
+        }
+
+        console.log(`🧠 Score IA: ${avaliacaoIA.score}/100 | Classificação: ${avaliacaoIA.classificacao}`);
+
+        if (avaliacaoIA.score < 60 || avaliacaoIA.classificacao.includes("Não publicar")) {
+            console.log(`🗑️ Oferta descartada pela IA. Motivo: ${avaliacaoIA.motivo_descarte || 'Score muito baixo'}`);
+            await page.keyboard.press('Escape');
+            continue;
+        }
+
+        console.log(`✅ Oferta APROVADA! Gerando payload completo...`);
+
         const offerDetails = {
-           id: finalLink.split('/').pop() || 'MLB',
-           title: productInfo.title,
-           price: productInfo.price || 0.01,
-           pictureUrl: productInfo.pictureUrl,
-           permalink: finalLink // AQUI VAI O SEU LINK CURTO COMISSIONADO!
+            ...avaliacaoIA,
+            id: finalLink.split('/').pop() || 'MLB',
+            permalink: finalLink,
+            link_afiliado: finalLink,
+            title: avaliacaoIA.nome || detailedData.title,
+            price: avaliacaoIA.preco || detailedData.price,
+            pictureUrl: avaliacaoIA.imagem || detailedData.pictureUrl,
+            aiEvaluation: avaliacaoIA
         };
 
-        console.log(`🔗 Link de Afiliado Capturado: ${offerDetails.permalink}`);
-        console.log('🚀 Enviando pacote para o Cérebro IA (VPS)...');
+        console.log('🚀 Enviando pacote super enriquecido para o Cérebro IA (VPS)...');
         
         const response = await fetch(VPS_ENDPOINT, {
           method: 'POST',
@@ -245,13 +383,15 @@ const SCHEDULE_REGULAR = '0 8,10,12,14,16,18,20 * * *';
 const SCHEDULE_TESTE = '15 0 * * *'; // Horário de teste (00:15)
 
 console.log('====================================================');
-console.log('🕒 ROBÔ GARIMPEIRO ATIVADO NO MODO 24/7');
-console.log('📅 Horários agendados: 08h, 10h, 12h, 14h, 16h, 18h e 20h');
-console.log('🛠️  Horário extra de teste ativado: 00:15');
+console.log('🕒 ROBÔ GARIMPEIRO NO MODO TESTE IMEDIATO (Sem trava de horário)');
 console.log('⚠️  Deixe esta janela preta aberta (se fechar, ele para de rodar).');
 console.log('====================================================\n');
-console.log('💤 Aguardando pacientemente o próximo horário...');
+console.log('🚀 Iniciando varredura IMEDIATAMENTE...');
 
+// Roda na mesma hora que abrir o arquivo para testes:
+runScraper();
+
+/* COMENTADO TEMPORARIAMENTE PARA TESTES
 cron.schedule(SCHEDULE_REGULAR, () => {
   runScraper();
 });
@@ -265,6 +405,17 @@ cron.schedule('10 12 * * *', () => {
   console.log('⏰ Horário de TESTE atingido (12:10)! Iniciando...');
   runScraper();
 });
+
+cron.schedule('32 15 * * *', () => {
+  console.log('⏰ Horário de TESTE atingido (15:32)! Iniciando...');
+  runScraper();
+});
+
+cron.schedule('46 15 * * *', () => {
+  console.log('⏰ Horário de TESTE atingido (15:46)! Iniciando...');
+  runScraper();
+});
+*/
 
 // ============================================================================
 // LABORATORY QUEUE POLLING
@@ -409,9 +560,14 @@ async function processLaboratoryTask(task) {
        
        // Estratégia 2: Pegar da div principal de preço promocional (ignorando o valor original riscado)
        if (!price || isNaN(price)) {
-           const priceStr = document.querySelector('.ui-pdp-price__second-line .andes-money-amount__fraction')?.innerText || 
-                            document.querySelector('.andes-money-amount__fraction')?.innerText || '0';
-           price = parseFloat(priceStr.replace(/\./g, ''));
+            // Pega todos os preços no card e escolhe o menor (geralmente o promocional, ignorando o riscado)
+            const priceElements = document.querySelectorAll('.andes-money-amount__fraction');
+            let priceFound = 0;
+            if (priceElements.length > 0) {
+                let prices = Array.from(priceElements).map(el => parseFloat(el.innerText.replace(/\./g, '')));
+                priceFound = Math.min(...prices.filter(p => p > 0));
+            }
+            price = priceFound;
        }
 
        // Estratégia 3: Pegar o valor original riscado e desconto
