@@ -15,12 +15,12 @@ export function Sidebar({ currentCategory }: { currentCategory?: string }) {
   ];
 
   return (
-    <aside className="w-full lg:w-64 flex-shrink-0">
-      <div className="rounded-2xl bg-[#111111] p-4 shadow-xl border border-white/5">
-        <h3 className="mb-4 px-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+    <aside id="categorias" className="w-full lg:w-64 flex-shrink-0 scroll-mt-24">
+      <div className="rounded-2xl bg-[#111111] p-3 lg:p-4 shadow-xl border border-white/5">
+        <h3 className="hidden lg:block mb-4 px-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
           Categorias
         </h3>
-        <nav className="space-y-1">
+        <nav className="flex overflow-x-auto lg:flex-col lg:space-y-1 gap-2 pb-2 lg:pb-0 scrollbar-hide">
           {categories.map((category) => {
             const Icon = category.icon;
             
@@ -35,20 +35,20 @@ export function Sidebar({ currentCategory }: { currentCategory?: string }) {
                 key={category.name}
                 href={href}
                 scroll={false}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex flex-none items-center gap-2 lg:gap-3 rounded-xl px-4 lg:px-3 py-2 lg:py-2.5 text-xs lg:text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-purple-500/10 text-purple-400'
-                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
+                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 lg:border-transparent'
+                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200 bg-white/5 lg:bg-transparent border border-white/5 lg:border-transparent'
                 }`}
               >
-                <Icon className="h-5 w-5" />
-                {category.name}
+                <Icon className="h-4 w-4 lg:h-5 lg:w-5" />
+                <span className="whitespace-nowrap">{category.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-8 rounded-xl bg-gradient-to-br from-[#2a1a4a] to-[#1c1236] p-4 border border-purple-500/20">
+        <div className="hidden lg:block mt-8 rounded-xl bg-gradient-to-br from-[#2a1a4a] to-[#1c1236] p-4 border border-purple-500/20">
           <div className="flex items-center gap-2 mb-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#10b981] text-white">
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">

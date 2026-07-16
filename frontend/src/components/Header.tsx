@@ -30,10 +30,10 @@ export function Header() {
         {/* Navigation & Action */}
         <div className="flex items-center gap-8">
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-zinc-400">
-            <Link href="/" className="text-white border-b-2 border-purple-500 py-1">Início</Link>
-            <Link href="#" className="hover:text-zinc-200 transition-colors">Categorias</Link>
-            <Link href="#" className="hover:text-zinc-200 transition-colors">Ofertas</Link>
-            <Link href="#" className="hover:text-zinc-200 transition-colors">Favoritos</Link>
+            <Link href="/" className="hover:text-zinc-200 transition-colors">Início</Link>
+            <a href="#categorias" className="hover:text-zinc-200 transition-colors">Categorias</a>
+            <a href="#ofertas" className="hover:text-zinc-200 transition-colors">Ofertas</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Sistema de Favoritos em breve!'); }} className="hover:text-zinc-200 transition-colors">Favoritos</a>
           </nav>
 
           <a

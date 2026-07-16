@@ -48,8 +48,8 @@ export default async function Home({
           
           <Sidebar currentCategory={categoria} />
 
-          <div className="flex-1 min-w-0">
-            <div className="mb-8 flex items-center gap-2">
+          <div className="flex-1 min-w-0" id="ofertas">
+            <div className="mb-8 flex items-center gap-2 scroll-mt-24">
               <span className="text-xl">🔥</span>
               <h2 className="text-2xl font-bold tracking-tight text-white">Ofertas em destaque</h2>
               <div className="ml-auto">
