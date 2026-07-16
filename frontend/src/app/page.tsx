@@ -6,9 +6,13 @@ import { BadgePercent, ShieldCheck, Tag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-async function getProducts() {
+async function getProducts(category?: string) {
   try {
-    const res = await fetch("http://api:3000/products", { 
+    const url = category 
+      ? `http://api:3000/products?category=${encodeURIComponent(category)}`
+      : "http://api:3000/products";
+      
+    const res = await fetch(url, { 
       next: { revalidate: 60 }
     });
     
@@ -24,8 +28,13 @@ async function getProducts() {
   }
 }
 
-export default async function Home() {
-  const products = await getProducts();
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const categoria = typeof searchParams.categoria === 'string' ? searchParams.categoria : undefined;
+  const products = await getProducts(categoria);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans selection:bg-purple-500/30">
@@ -36,7 +45,7 @@ export default async function Home() {
       <main className="mx-auto max-w-[1600px] px-6 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           
-          <Sidebar />
+          <Sidebar currentCategory={categoria} />
 
           <div className="flex-1 min-w-0">
             <div className="mb-8 flex items-center gap-2">

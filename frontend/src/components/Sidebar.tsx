@@ -1,9 +1,9 @@
 import { Home, Smartphone, Sofa, Heart, Shirt, Dumbbell, Monitor, Gamepad2, Car } from 'lucide-react';
 import Link from 'next/link';
 
-export function Sidebar() {
+export function Sidebar({ currentCategory }: { currentCategory?: string }) {
   const categories = [
-    { name: 'Todas as ofertas', icon: Home, active: true },
+    { name: 'Todas as ofertas', icon: Home },
     { name: 'Eletrônicos', icon: Smartphone },
     { name: 'Casa e Decoração', icon: Sofa },
     { name: 'Beleza e Saúde', icon: Heart },
@@ -23,18 +23,26 @@ export function Sidebar() {
         <nav className="space-y-1">
           {categories.map((category) => {
             const Icon = category.icon;
+            
+            // "Todas as ofertas" is active when no specific category is selected
+            const isTodas = category.name === 'Todas as ofertas';
+            const isActive = isTodas ? !currentCategory : currentCategory === category.name;
+            
+            const href = isTodas ? '/' : `/?categoria=${encodeURIComponent(category.name)}`;
+
             return (
-              <button
+              <Link
                 key={category.name}
+                href={href}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                  category.active
+                  isActive
                     ? 'bg-purple-500/10 text-purple-400'
                     : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
                 }`}
               >
                 <Icon className="h-5 w-5" />
                 {category.name}
-              </button>
+              </Link>
             );
           })}
         </nav>
