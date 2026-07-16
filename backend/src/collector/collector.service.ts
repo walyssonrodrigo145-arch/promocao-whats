@@ -255,6 +255,8 @@ export class CollectorService {
       const analysisJson = await this.aiService.analyzeProduct({
         title: scrapedData.title,
         price: scrapedData.price,
+        originalPrice: scrapedData.originalPrice,
+        discountPercentage: scrapedData.discountPercentage,
         permalink: scrapedData.permalink,
         image: scrapedData.pictureUrl
       });
@@ -264,7 +266,9 @@ export class CollectorService {
         _raw: {
           title: scrapedData.title,
           price: scrapedData.price,
-          link: scrapedData.permalink,
+          originalPrice: scrapedData.originalPrice,
+          discountPercentage: scrapedData.discountPercentage,
+          link: scrapedData.permalink || task.url,
           image: scrapedData.pictureUrl
         }
       };

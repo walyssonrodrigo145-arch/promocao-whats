@@ -20,7 +20,7 @@ async function runScraper() {
   console.log('\n🤖 [START] Garimpeiro de Afiliados Iniciado!');
   
   const browser = await puppeteer.launch({
-    headless: false, // DEVE ser false para que a área de transferência funcione em algumas versões, e para você acompanhar
+    headless: false, // <- TEM QUE SER FALSE. O Mercado Livre bloqueia o modo fantasma!
     defaultViewport: null,
     userDataDir: './perfil_chrome_robo',
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
@@ -256,8 +256,13 @@ cron.schedule(SCHEDULE_REGULAR, () => {
   runScraper();
 });
 
-cron.schedule(SCHEDULE_TESTE, () => {
+cron.schedule('15 00 * * *', () => {
   console.log('⏰ Horário de TESTE atingido (00:15)! Iniciando...');
+  runScraper();
+});
+
+cron.schedule('10 12 * * *', () => {
+  console.log('⏰ Horário de TESTE atingido (12:10)! Iniciando...');
   runScraper();
 });
 
@@ -289,7 +294,7 @@ async function processLaboratoryTask(task) {
   let browser;
   try {
     browser = await puppeteer.launch({
-      headless: false, // Mostrar a janela para você acompanhar a mágica
+      headless: false, // <- TEM QUE SER FALSE. ML bloqueia modo fantasma.
       defaultViewport: null,
       userDataDir: './perfil_chrome_robo',
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
@@ -298,8 +303,65 @@ async function processLaboratoryTask(task) {
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     
-    console.log(`[LABORATÓRIO] Acessando link: ${task.url}`);
-    await page.goto(task.url, { waitUntil: 'networkidle2', timeout: 30000 });
+    let finalUrl = task.url;
+
+    // Se for um link cru do ML (e não um link já encurtado meli.la), o robô gera o link de afiliado primeiro
+    if (finalUrl.includes('mercadolivre.com.br') && !finalUrl.includes('meli.la')) {
+        console.log(`[LABORATÓRIO] Link cru detectado. Acessando Gerador de Links de Afiliado...`);
+        try {
+            await page.goto('https://www.mercadolivre.com.br/afiliados/linkbuilder#hub', { waitUntil: 'networkidle2', timeout: 30000 });
+            
+            // Espera a caixa de texto para inserir a URL aparecer
+            await page.waitForSelector('textarea', { timeout: 15000 });
+            console.log(`[LABORATÓRIO] Colando a URL original...`);
+            await page.type('textarea', finalUrl);
+            
+            // Procura e clica no botão "Gerar"
+            const btnGerar = await page.$('::-p-xpath(//button[contains(., "Gerar")])');
+            if (btnGerar) {
+                console.log(`[LABORATÓRIO] Clicando em Gerar...`);
+                await btnGerar.click();
+                
+                // Espera o botão "Copiar" aparecer como sinal de sucesso
+                await page.waitForSelector('::-p-xpath(//button[contains(., "Copiar")])', { timeout: 15000 });
+                
+                // Dá 1 segundinho extra pro React renderizar o link na tela
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Extrai o link encurtado gerado caçando em todo o HTML
+                const generatedLink = await page.evaluate(() => {
+                    // Tenta achar em inputs primeiro
+                    const inputs = document.querySelectorAll('input');
+                    for (let input of inputs) {
+                        if (input.value && input.value.includes('meli.la')) {
+                            return input.value;
+                        }
+                    }
+                    // Se não achar, procura em todo o HTML da página
+                    const html = document.body.innerHTML;
+                    const match = html.match(/https?:\/\/meli\.la\/[a-zA-Z0-9]+/);
+                    return match ? match[0] : null;
+                });
+                
+                if (generatedLink) {
+                    console.log(`[LABORATÓRIO] ✅ Link convertido com sucesso para: ${generatedLink}`);
+                    finalUrl = generatedLink; // Substitui o link original pelo link de afiliado!
+                } else {
+                    console.log(`[LABORATÓRIO] ⚠️ Falha ao ler o link gerado na tela.`);
+                }
+            } else {
+                console.log(`[LABORATÓRIO] ⚠️ Botão "Gerar" não encontrado.`);
+            }
+        } catch (linkErr) {
+            console.error(`[LABORATÓRIO] ⚠️ Erro ao tentar gerar link de afiliado: ${linkErr.message}. Continuando com link original.`);
+        }
+    }
+
+    console.log(`[LABORATÓRIO] Acessando link final do produto: ${finalUrl}`);
+    await page.goto(finalUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    // Aguarda um pouco pro React renderizar o corpo da página (seja produto ou vitrine)
+    await new Promise(r => setTimeout(r, 2000));
 
     // Se for vitrine (meli.la -> social), clica no produto principal
     if (page.url().includes('/social/')) {
@@ -335,6 +397,8 @@ async function processLaboratoryTask(task) {
            }
         }
     }
+    // Espera o título do produto carregar (garante que a página renderizou)
+    await page.waitForSelector('.ui-pdp-title', { timeout: 10000 }).catch(() => {});
 
     const data = await page.evaluate(() => {
        const title = document.querySelector('.ui-pdp-title')?.innerText || '';
@@ -350,13 +414,25 @@ async function processLaboratoryTask(task) {
            price = parseFloat(priceStr.replace(/\./g, ''));
        }
 
-       // Estratégia 3: Pegar o valor original riscado (se houver)
-       const originalPriceStr = document.querySelector('.ui-pdp-price__original-value .andes-money-amount__fraction')?.innerText;
-       let originalPrice = originalPriceStr ? parseFloat(originalPriceStr.replace(/\./g, '')) : null;
+       // Estratégia 3: Pegar o valor original riscado e desconto
+       let originalPrice = null;
+       let discountPercentage = null;
+       const origNode = document.querySelector('s.andes-money-amount') || document.querySelector('.ui-pdp-price__original-value.andes-money-amount');
+       if (origNode) {
+           const frac = origNode.querySelector('.andes-money-amount__fraction')?.innerText.replace(/\./g, '') || '0';
+           const cents = origNode.querySelector('.andes-money-amount__cents')?.innerText || '00';
+           originalPrice = parseFloat(`${frac}.${cents}`);
+       }
+       const discountNode = document.querySelector('.ui-pdp-price__main-container .ui-pdp-label-as-pill');
+       if (discountNode && discountNode.innerText.includes('%')) {
+           discountPercentage = discountNode.innerText.trim();
+       }
 
        const img = document.querySelector('.ui-pdp-gallery__figure__image')?.src || '';
-       return { title, price, originalPrice, pictureUrl: img };
+       return { title, price, originalPrice, discountPercentage, pictureUrl: img };
     });
+
+    data.permalink = finalUrl;
 
     console.log(`[LABORATÓRIO] Dados extraídos: ${data.title} (R$ ${data.price})`);
 
@@ -367,7 +443,7 @@ async function processLaboratoryTask(task) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         taskId: task.id, 
-        scrapedData: { ...data, permalink: task.url } 
+        scrapedData: { ...data, permalink: finalUrl } 
       })
     });
     console.log(`[LABORATÓRIO] Tarefa ${task.id} devolvida para a VPS com sucesso!`);
@@ -383,7 +459,15 @@ async function processLaboratoryTask(task) {
       })
     });
   } finally {
-    if (browser) await browser.close();
+    if (browser) {
+        try {
+            const pages = await browser.pages();
+            for (const p of pages) {
+                await p.close().catch(() => {});
+            }
+        } catch (e) {}
+        await browser.close();
+    }
   }
 }
 

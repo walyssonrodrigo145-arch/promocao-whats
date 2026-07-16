@@ -159,7 +159,14 @@ export default function Laboratorio() {
                 <div className="space-y-1">
                   <p className="text-2xl font-black text-emerald-400">R$ {analysis._raw?.price}</p>
                   {(analysis._raw?.originalPrice || analysis.preco_antigo) && (
-                    <p className="text-sm text-zinc-500 line-through">De: R$ {analysis._raw?.originalPrice || analysis.preco_antigo}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-zinc-500 line-through">De: R$ {analysis._raw?.originalPrice || analysis.preco_antigo}</p>
+                      {analysis._raw?.discountPercentage && (
+                        <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-medium">
+                          {analysis._raw.discountPercentage}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
