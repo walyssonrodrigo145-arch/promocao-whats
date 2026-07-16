@@ -72,10 +72,21 @@ export class CollectorService {
         title: itemDetails.title,
         price: itemDetails.price,
         permalink: itemDetails.permalink,
+        image: imageUrl
       };
 
-      this.logger.log('Generating AI copy...');
-      const copy = await this.aiService.generateCopy(productInfo);
+      this.logger.log('Step 1: Running AI Analyst (Pipeline Stage 1)...');
+      let analysisJson: any = null;
+      try {
+        analysisJson = await this.aiService.analyzeProduct(productInfo);
+        this.logger.log(`Analysis complete. Score: ${analysisJson.score}`);
+      } catch (err) {
+        this.logger.warn('Failed AI Analysis, falling back to raw data for Copywriter.');
+        analysisJson = productInfo;
+      }
+
+      this.logger.log('Step 2: Generating AI Copy (Pipeline Stage 2)...');
+      const copy = await this.aiService.generateCopy(analysisJson);
 
       this.logger.log(`Sending message to WhatsApp group ${this.TARGET_GROUP_JID}...`);
       if (imageUrl) {
@@ -120,8 +131,20 @@ export class CollectorService {
          }
       }
 
-      const productInfo = { title, price, permalink: link };
-      const message = await this.aiService.generateCopy(productInfo);
+      const productInfo = { title, price, permalink: link, image: imageUrl };
+      
+      this.logger.log('Step 1: Running AI Analyst (Pipeline Stage 1)...');
+      let analysisJson: any = null;
+      try {
+        analysisJson = await this.aiService.analyzeProduct(productInfo);
+        this.logger.log(`Analysis complete. Score: ${analysisJson.score}, Priority: ${analysisJson.prioridade}`);
+      } catch (err) {
+        this.logger.warn('Failed AI Analysis, falling back to raw data for Copywriter.');
+        analysisJson = productInfo;
+      }
+
+      this.logger.log('Step 2: Generating AI Copy (Pipeline Stage 2)...');
+      const message = await this.aiService.generateCopy(analysisJson);
 
       this.logger.log(`Copy generated. Posting to WhatsApp...`);
 
@@ -133,7 +156,7 @@ export class CollectorService {
         await this.evolutionService.sendTextMessage(this.TARGET_GROUP_JID, message);
       }
 
-      // 6. Salvar no Banco de Dados (Para a Lojinha Virtual)
+      // 6. Salvar no Banco de Dados (Para a Lojinha Virtual com dados ricos)
       try {
         const dbProduct = await this.prisma.produto.create({
           data: {
@@ -142,6 +165,15 @@ export class CollectorService {
             imagem: imageUrl || '',
             linkOriginal: link, // Usando o link reduzido
             dataPromocao: new Date(),
+            nicho: analysisJson?.nicho || null,
+            publicoAlvo: analysisJson?.publico_alvo || null,
+            intencaoCompra: analysisJson?.intencao_compra || null,
+            score: analysisJson?.score ? parseInt(analysisJson.score) : null,
+            prioridade: analysisJson?.prioridade || null,
+            gatilhos: analysisJson?.gatilhos || [],
+            beneficios: analysisJson?.beneficios || [],
+            doresResolvidas: analysisJson?.dores_resolvidas || [],
+            palavrasImpacto: analysisJson?.palavras_impacto || [],
             linksAfiliado: {
               create: {
                 linkOriginal: link,
@@ -151,7 +183,7 @@ export class CollectorService {
             }
           }
         });
-        this.logger.log(`Product saved to database with ID: ${dbProduct.id}`);
+        this.logger.log(`Product saved to database with ID: ${dbProduct.id} and rich AI fields.`);
       } catch (dbError) {
         this.logger.error(`Failed to save product to DB: ${dbError.message}`);
       }

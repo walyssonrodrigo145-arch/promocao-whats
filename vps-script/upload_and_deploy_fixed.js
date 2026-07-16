@@ -54,6 +54,9 @@ conn.on('ready', async () => {
     console.log('--- Subindo Docker Compose ---');
     await runCommand('cd promocao-whats && docker compose up -d --build');
 
+    console.log('--- Atualizando Banco de Dados ---');
+    await runCommand('docker exec musicpro-ofertas-api npx prisma db push');
+
     console.log('✅ Deploy finalizado com sucesso!');
   } catch (err) {
     console.error('Erro durante o deploy:', err);

@@ -47,6 +47,17 @@ model Produto {
   disponibilidade    Boolean            @default(true)
   dataPromocao       DateTime
   
+  // AI Analyst Fields
+  nicho              String?
+  publicoAlvo        String?
+  intencaoCompra     String?
+  score              Int?
+  prioridade         String?
+  gatilhos           String[]           @default([])
+  beneficios         String[]           @default([])
+  doresResolvidas    String[]           @default([])
+  palavrasImpacto    String[]           @default([])
+  
   categoriaId        String?
   categoria          Categoria?         @relation(fields: [categoriaId], references: [id])
   
