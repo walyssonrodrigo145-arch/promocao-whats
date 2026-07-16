@@ -1,12 +1,14 @@
 import { Controller, Post, Query, Body, Get } from '@nestjs/common';
 import { CollectorService } from './collector.service';
 import { AiLearningService } from '../ai/ai-learning.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('collector')
 export class CollectorController {
   constructor(
     private readonly collectorService: CollectorService,
     private readonly aiLearningService: AiLearningService,
+    private readonly prisma: PrismaService
   ) {}
 
   @Get('learning')

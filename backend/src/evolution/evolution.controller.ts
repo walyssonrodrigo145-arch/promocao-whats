@@ -1,10 +1,16 @@
-import { Controller, Get, Query, Res, HttpException, HttpStatus, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Res, HttpException, HttpStatus, Post, Body, Logger } from '@nestjs/common';
 import { EvolutionService } from './evolution.service';
+import { PrismaService } from '../prisma/prisma.service';
 import type { Response } from 'express';
 
 @Controller('api/evolution')
 export class EvolutionController {
-  constructor(private readonly evolutionService: EvolutionService) {}
+  private readonly logger = new Logger(EvolutionController.name);
+
+  constructor(
+    private readonly evolutionService: EvolutionService,
+    private readonly prisma: PrismaService
+  ) {}
 
   @Get('qrcode')
   async getQrCode(@Query('instance') instanceName: string, @Res() res: Response) {
@@ -83,16 +89,29 @@ export class EvolutionController {
         if (msg.key.fromMe || msg.key.remoteJid === 'status@broadcast') return { success: true };
 
         const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+        const remoteJid = msg.key.remoteJid;
         
-        if (text.includes('mercadolivre.com') || text.includes('mlb.com')) {
+        // Treinamento v3.2 - Espionagem da Concorrência
+        const targetGroupJid = '120363417189388254@g.us';
+
+        if (remoteJid === targetGroupJid) {
+          const urlRegex = /(https?:\/\/[^\s]+)/g;
+          const urls = text.match(urlRegex);
+
+          if (urls && urls.length > 0) {
+            this.logger.log(`🚨 Webhook: Encontrada oportunidade da concorrência! URL: ${urls[0]}`);
+            
+            // Dispara o nosso Collector da VPS que processará e postará automaticamente
+            fetch('http://localhost:3000/collector/trigger?url=' + encodeURIComponent(urls[0]), { method: 'POST' }).catch(e => console.error(e));
+          }
+        } else if (text.includes('mercadolivre.com') || text.includes('mlb.com')) {
+          // Outras origens - Processa diretamente pelo collector antigo
           console.log('Detected Mercado Livre Link via Webhook!');
-          
-          // Dispara o nosso Collector, que vai processar e jogar no grupo!
           fetch('http://localhost:3000/collector/trigger?url=' + encodeURIComponent(text), { method: 'POST' }).catch(e => console.error(e));
         }
       }
     } catch(e) {
-      console.error('Webhook error:', e);
+      this.logger.error('Webhook error:', e);
     }
     
     return { success: true };
