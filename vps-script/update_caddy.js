@@ -15,6 +15,9 @@ promo.wrmusicpro.com.br {
     handle /api/* {
         reverse_proxy 76.13.228.159:3000
     }
+    handle /collector/* {
+        reverse_proxy 76.13.228.159:3000
+    }
     handle /* {
         reverse_proxy 76.13.228.159:3001
     }

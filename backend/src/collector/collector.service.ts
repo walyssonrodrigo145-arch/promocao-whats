@@ -95,19 +95,38 @@ export class CollectorService {
     try {
       this.logger.log(`Processing direct offer received from scraper: ${offer.title}`);
       
-      const link = offer.permalink;
-      const title = offer.title;
-      const price = offer.price;
-      const pictures = [{ url: offer.pictureUrl }];
+      let link = offer.permalink;
+      let title = offer.title;
+      let price = offer.price;
+      let imageUrl = offer.pictureUrl;
 
-      const message = await this.aiService.generateCopy({ title, price, permalink: link });
+      // Fallback Inteligente: Se o robô não conseguiu extrair o título ou a foto do Dashboard de Afiliados,
+      // o Backend usa o link curto gerado para descobrir o ID do produto e consultar a API oficial do ML!
+      if (title === 'Oferta Imperdível' || !imageUrl) {
+         this.logger.log(`Incomplete data received. Resolving shortlink ${link} to fetch real data from ML API...`);
+         const itemId = await this.mlService.resolveUrlAndGetItemId(link);
+         if (itemId) {
+             const itemDetails = await this.mlService.getItemDetails(itemId);
+             if (itemDetails) {
+                 title = itemDetails.title || title;
+                 price = itemDetails.price || price;
+                 imageUrl = (itemDetails.pictures && itemDetails.pictures.length > 0) 
+                            ? itemDetails.pictures[0].url 
+                            : (itemDetails.thumbnail || imageUrl);
+                 this.logger.log(`Fallback successful! Real title: ${title}`);
+             }
+         }
+      }
+
+      const productInfo = { title, price, permalink: link };
+      const message = await this.aiService.generateCopy(productInfo);
 
       this.logger.log(`Copy generated. Posting to WhatsApp...`);
 
       // 5. Send Message to Evolution API
-      if (pictures && pictures.length > 0 && pictures[0].url) {
+      if (imageUrl) {
         // A Evolution API aceita URL diretamente em mediaUrl
-        await this.evolutionService.sendMediaMessage(this.TARGET_GROUP_JID, message, pictures[0].url);
+        await this.evolutionService.sendMediaMessage(this.TARGET_GROUP_JID, message, imageUrl);
       } else {
         await this.evolutionService.sendTextMessage(this.TARGET_GROUP_JID, message);
       }
