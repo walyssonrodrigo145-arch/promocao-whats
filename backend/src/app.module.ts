@@ -12,6 +12,7 @@ import { EvolutionModule } from './evolution/evolution.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { MercadoLivreModule } from './mercadolivre/mercadolivre.module';
 import { ProductsModule } from './products/products.module';
+import { CleanupModule } from './cleanup/cleanup.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { ProductsModule } from './products/products.module';
     MessageModule, 
     EvolutionModule,
     MercadoLivreModule,
-    ProductsModule
+    ProductsModule,
+    CleanupModule
   ],
   controllers: [AppController],
   providers: [AppService],

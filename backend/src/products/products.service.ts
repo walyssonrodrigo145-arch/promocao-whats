@@ -6,9 +6,18 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(category?: string) {
-    const whereClause = category 
-      ? { nicho: { contains: category, mode: 'insensitive' as const } } 
-      : {};
+    const ontem = new Date();
+    ontem.setHours(ontem.getHours() - 24);
+
+    const whereClause: any = {
+      dataPromocao: {
+        gte: ontem
+      }
+    };
+
+    if (category) {
+      whereClause.nicho = { contains: category, mode: 'insensitive' as const };
+    }
 
     return this.prisma.produto.findMany({
       where: whereClause,
