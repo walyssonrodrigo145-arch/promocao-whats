@@ -104,11 +104,11 @@ export class CollectorService {
     }
   }
 
-  async processDirectOffer(offer: { id: string, title: string, price: number, permalink: string, pictureUrl: string }) {
+  async processDirectOffer(offer: any) {
     try {
       this.logger.log(`Processing direct offer received from scraper: ${offer.title}`);
       
-      let link = offer.permalink;
+      let link = offer.permalink || offer.affiliateLink;
       let title = offer.title;
       let price = offer.price;
       let imageUrl = offer.pictureUrl;
@@ -133,14 +133,20 @@ export class CollectorService {
 
       const productInfo = { title, price, permalink: link, image: imageUrl };
       
-      this.logger.log('Step 1: Running AI Analyst (Pipeline Stage 1)...');
-      let analysisJson: any = null;
-      try {
-        analysisJson = await this.aiService.analyzeProduct(productInfo);
-        this.logger.log(`Analysis complete. Score: ${analysisJson.score}, Priority: ${analysisJson.prioridade}`);
-      } catch (err) {
-        this.logger.warn('Failed AI Analysis, falling back to raw data for Copywriter.');
-        analysisJson = productInfo;
+      let analysisJson: any = offer.aiEvaluation;
+
+      if (!analysisJson) {
+        this.logger.log('Step 1: Running AI Analyst (Pipeline Stage 1)...');
+        try {
+          analysisJson = await this.aiService.analyzeProduct(productInfo);
+          this.logger.log(`Analysis complete. Score: ${analysisJson.score}, Priority: ${analysisJson.prioridade}`);
+        } catch (err) {
+          this.logger.warn('Failed AI Analysis, falling back to raw data for Copywriter.');
+          analysisJson = productInfo;
+        }
+      } else {
+        this.logger.log('Step 1: Skipping AI Analyst (Received pre-computed analysis from Scraper payload).');
+        analysisJson._raw = productInfo;
       }
 
       this.logger.log('Step 2: Generating AI Copy (Pipeline Stage 2)...');
