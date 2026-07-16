@@ -107,9 +107,9 @@ export class CollectorService {
       // 5. Send Message to Evolution API
       if (pictures && pictures.length > 0 && pictures[0].url) {
         // A Evolution API aceita URL diretamente em mediaUrl
-        await this.evolutionService.sendMediaMessage('WRPROMO', message, pictures[0].url);
+        await this.evolutionService.sendMediaMessage(this.TARGET_GROUP_JID, message, pictures[0].url);
       } else {
-        await this.evolutionService.sendTextMessage('WRPROMO', message);
+        await this.evolutionService.sendTextMessage(this.TARGET_GROUP_JID, message);
       }
 
       this.logger.log('Direct offer successfully processed and posted.');
