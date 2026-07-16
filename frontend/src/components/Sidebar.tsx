@@ -34,6 +34,7 @@ export function Sidebar({ currentCategory }: { currentCategory?: string }) {
               <Link
                 key={category.name}
                 href={href}
+                scroll={false}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-purple-500/10 text-purple-400'
