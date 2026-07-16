@@ -122,8 +122,8 @@ export class MercadoLivreService {
   async resolveUrlAndGetItemId(url: string): Promise<string | null> {
     try {
       let finalUrl = url;
-      // Se for URL curta, segue o redirect
-      if (url.includes('/sec/')) {
+      // Se for URL curta ou link do meli.la, segue o redirect
+      if (url.includes('/sec/') || url.includes('meli.la')) {
         const response = await fetch(url, { redirect: 'manual', headers: {'User-Agent': 'Mozilla/5.0'} });
         if (response.status >= 300 && response.status < 400) {
           finalUrl = response.headers.get('location') || url;
