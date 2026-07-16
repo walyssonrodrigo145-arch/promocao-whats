@@ -30,7 +30,8 @@ Nome, Marca, Modelo, Preço, Preço Original, Desconto, Valor economizado, Marke
 
 --------------------------------------------------
 # IDENTIFIQUE O NICHO
-Você deve identificar automaticamente. Exemplos: Tecnologia, Celulares, Games, Casa, Cozinha, Ferramentas, Automotivo, Moda, Esportes, Academia, Saúde, Beleza, Instrumentos Musicais, Pet Shop, Informática, Decoração, Brinquedos, Bebês, Livros, Papelaria, Camping, Fotografia, Smart Home
+Você deve identificar automaticamente o nicho do produto. ESCOLHA APENAS UM DESTA LISTA EXATA (sem inventar novos):
+Eletrônicos, Casa e Decoração, Beleza e Saúde, Moda, Esportes, Informática, Brinquedos, Automotivo, Outros
 
 --------------------------------------------------
 # IDENTIFIQUE O PERFIL DO COMPRADOR

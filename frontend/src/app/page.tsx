@@ -31,9 +31,10 @@ async function getProducts(category?: string) {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const categoria = typeof searchParams.categoria === 'string' ? searchParams.categoria : undefined;
+  const params = await searchParams;
+  const categoria = typeof params.categoria === 'string' ? params.categoria : undefined;
   const products = await getProducts(categoria);
 
   return (
