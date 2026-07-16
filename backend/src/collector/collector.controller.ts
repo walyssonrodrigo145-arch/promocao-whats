@@ -1,9 +1,19 @@
 import { Controller, Post, Query, Body, Get } from '@nestjs/common';
 import { CollectorService } from './collector.service';
+import { AiLearningService } from '../ai/ai-learning.service';
 
 @Controller('collector')
 export class CollectorController {
-  constructor(private readonly collectorService: CollectorService) {}
+  constructor(
+    private readonly collectorService: CollectorService,
+    private readonly aiLearningService: AiLearningService,
+  ) {}
+
+  @Get('learning')
+  async getDailyLearningReport() {
+    const report = await this.aiLearningService.getLatestReport();
+    return { report };
+  }
 
   @Post('trigger')
   async triggerCollection(@Query('q') q?: string, @Query('url') url?: string) {

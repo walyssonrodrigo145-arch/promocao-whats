@@ -20,6 +20,22 @@ async function runScraper() {
   isRunning = true;
   console.log('\n🤖 [START] Garimpeiro de Afiliados Iniciado!');
   
+  // BAIXA O APRENDIZADO DIÁRIO (TREINAMENTOS 4 A 8)
+  let aprendizadoDiario = "";
+  try {
+    console.log('🧠 Baixando Relatório de Inteligência Comercial da VPS...');
+    const res = await fetch('https://promo.wrmusicpro.com.br/collector/learning');
+    if (res.ok) {
+        const data = await res.json();
+        if (data && data.report) {
+            aprendizadoDiario = data.report;
+            console.log('✅ Relatório injetado com sucesso no cérebro da IA!');
+        }
+    }
+  } catch (e) {
+    console.log('⚠️ Relatório diário indisponível, usando inteligência base.');
+  }
+
   const browser = await puppeteer.launch({
     headless: false, // <- TEM QUE SER FALSE. O Mercado Livre bloqueia o modo fantasma!
     defaultViewport: null,
@@ -298,7 +314,7 @@ async function runScraper() {
         detailedData.permalink = finalLink;
         
         console.log(`🤖 Analisando oferta com a IA Groq: ${detailedData.title}...`);
-        const avaliacaoIA = await avaliarOferta(detailedData);
+        const avaliacaoIA = await avaliarOferta(detailedData, aprendizadoDiario);
         
         if (!avaliacaoIA) {
             console.log("❌ Falha na IA. Pulando oferta.");

@@ -335,4 +335,41 @@ RETORNE APENAS O TEXTO DA MENSAGEM, NADA MAIS.`;
       throw error;
     }
   }
+
+  async generateDailyReport(rawData: any): Promise<string> {
+    try {
+      const systemPrompt = `# TREINAMENTO 8 - AUTOAPERFEIÇOAMENTO
+Você é o Analista Estratégico da WR Promoções.
+Eu te passarei os dados de cliques e ofertas publicadas no dia de hoje.
+Sua missão é gerar um relatório de recomendações claras e curtas (máx 5 linhas) para a IA Garimpeira ler amanhã de manhã.
+Destaque o que deu certo (categorias com mais cliques) e recomende priorizar elas.
+Destaque o que deu errado (categorias sem cliques) e mande ignorar ou reduzir.
+Retorne APENAS o texto do relatório, que servirá de regra para amanhã.`;
+
+      const response = await fetch(this.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: JSON.stringify(rawData, null, 2) }
+          ],
+          temperature: 0.5,
+          max_tokens: 500
+        })
+      });
+
+      if (!response.ok) throw new Error('Falha ao gerar relatório diário');
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      this.logger.error('Error generating daily report:', error);
+      return "Foque nas ofertas com maior desconto real e melhor avaliação geral.";
+    }
+  }
 }
