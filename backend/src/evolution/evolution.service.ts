@@ -134,6 +134,7 @@ export class EvolutionService {
       const data = await response.json();
       
       if (!response.ok) {
+        this.logger.error(`Evolution API Error: ${JSON.stringify(data)}`);
         throw new Error(data.message || 'Failed to send media message');
       }
 
