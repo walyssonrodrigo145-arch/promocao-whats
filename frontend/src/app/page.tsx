@@ -31,12 +31,12 @@ export default async function Home() {
       <Header />
       <Hero />
 
-      <main className="mx-auto max-w-7xl px-6 py-12">
+      <main className="mx-auto max-w-[1600px] px-6 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           
           <Sidebar />
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="mb-8 flex items-center gap-2">
               <span className="text-xl">🔥</span>
               <h2 className="text-2xl font-bold tracking-tight text-white">Ofertas em destaque</h2>
@@ -54,7 +54,7 @@ export default async function Home() {
                 <p className="mt-2 text-zinc-500">O robô está garimpando as melhores promoções para você.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {products.map((produto: any) => (
                   <ProductCard key={produto.id} produto={produto} />
                 ))}

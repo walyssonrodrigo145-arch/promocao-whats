@@ -4,7 +4,7 @@ import { Tag, Zap, ShieldCheck, Trophy } from 'lucide-react';
 export function Hero() {
   return (
     <section className="relative overflow-hidden w-full border-b border-white/5 pb-16 pt-12 md:pt-20">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-[1600px] px-6">
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
           
           {/* Left: Text & Features */}
