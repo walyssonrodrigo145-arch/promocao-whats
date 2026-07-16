@@ -133,10 +133,24 @@ export class MercadoLivreService {
         }
       }
       
-      const match = finalUrl.match(/MLB-?(\d+)/i);
+      let match = finalUrl.match(/MLB-?(\d+)/i);
       if (match) {
         return `MLB${match[1]}`;
       }
+      
+      // Se for um link de vitrine (social) que não contém o MLB na URL
+      if (finalUrl.includes('/social/')) {
+        const socialResponse = await fetch(finalUrl, { headers: {'User-Agent': 'Mozilla/5.0'} });
+        if (socialResponse.ok) {
+          const html = await socialResponse.text();
+          // Pega o primeiro MLB encontrado no HTML (geralmente o produto em destaque)
+          const htmlMatch = html.match(/MLB-?(\d+)/i);
+          if (htmlMatch) {
+            return `MLB${htmlMatch[1]}`;
+          }
+        }
+      }
+      
       return null;
     } catch (e) {
       this.logger.error('Failed to resolve URL', e);

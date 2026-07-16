@@ -97,6 +97,14 @@ async function runScraper() {
                   title = img.alt || "Oferta Imperdível";
               }
               
+              // Tenta pegar o preço exato usando seletores precisos do ML
+              const currentPriceEl = card.querySelector('.poly-price__current .andes-money-amount__fraction, .andes-price-display__fraction, .andes-money-amount__fraction');
+              if (currentPriceEl) {
+                  const numStr = currentPriceEl.innerText.replace(/\./g, '');
+                  const p = parseFloat(numStr);
+                  if (!isNaN(p) && p > 0) price = p;
+              }
+
               // Busca textos na caixa para achar o título (geralmente texto > 15 chars)
               const allElements = Array.from(card.querySelectorAll('*'));
               for (const el of allElements) {
@@ -104,11 +112,12 @@ async function runScraper() {
                   if (t.length > 15 && !t.includes('Compartilhar') && !t.includes('R$') && title === "Oferta Imperdível") {
                       title = t;
                   }
-                  if (t.includes('R$')) {
+                  // Fallback para preço apenas se o seletor falhar, ignorando parcelamentos (x) e mantendo o menor preço
+                  if (price === 0.01 && t.includes('R$') && !t.toLowerCase().includes('x')) {
                       const num = t.replace(/[^0-9,]/g, '').replace(',', '.');
                       if (num) {
                           const p = parseFloat(num);
-                          if (p > 0 && price === 0.01) price = p;
+                          if (p > 0) price = p;
                       }
                   }
               }
@@ -252,3 +261,93 @@ cron.schedule(SCHEDULE_TESTE, () => {
   runScraper();
 });
 
+// ============================================================================
+// LABORATORY QUEUE POLLING
+// Verifica a cada 5 segundos se a equipe enviou algum link lá no painel da VPS
+// ============================================================================
+
+async function pollLaboratoryTasks() {
+  if (isRunning) return; // Não interrompe se o garimpo estiver rodando
+
+  try {
+    const res = await fetch('https://promo.wrmusicpro.com.br/collector/laboratory/pending-tasks');
+    if (!res.ok) return;
+    const { task } = await res.json();
+    
+    if (task && task.id) {
+       console.log(`\n🛎️ [LABORATÓRIO] Nova tarefa recebida da equipe! URL: ${task.url}`);
+       isRunning = true;
+       await processLaboratoryTask(task);
+       isRunning = false;
+    }
+  } catch (e) {
+    // Falhas de rede na verificação silenciosa são ignoradas
+  }
+}
+
+async function processLaboratoryTask(task) {
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    
+    console.log(`[LABORATÓRIO] Acessando link: ${task.url}`);
+    await page.goto(task.url, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    // Se for vitrine (meli.la -> social), clica no primeiro produto
+    if (page.url().includes('/social/')) {
+        console.log(`[LABORATÓRIO] Detectada vitrine (/social/). Acessando o primeiro produto...`);
+        const firstProduct = await page.$('.poly-card__content a');
+        if (firstProduct) {
+           await Promise.all([
+              page.waitForNavigation({ waitUntil: 'networkidle2' }),
+              firstProduct.click()
+           ]);
+        }
+    }
+
+    const data = await page.evaluate(() => {
+       const title = document.querySelector('.ui-pdp-title')?.innerText || '';
+       const priceStr = document.querySelector('.andes-money-amount__fraction')?.innerText || '0';
+       const price = parseFloat(priceStr.replace(/\./g, ''));
+       const img = document.querySelector('.ui-pdp-gallery__figure__image')?.src || '';
+       return { title, price, pictureUrl: img };
+    });
+
+    console.log(`[LABORATÓRIO] Dados extraídos: ${data.title} (R$ ${data.price})`);
+
+    if (!data.title) throw new Error("Não foi possível extrair o título. Página inválida ou bloqueada.");
+
+    await fetch('https://promo.wrmusicpro.com.br/collector/laboratory/submit-task', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        taskId: task.id, 
+        scrapedData: { ...data, permalink: task.url } 
+      })
+    });
+    console.log(`[LABORATÓRIO] Tarefa ${task.id} devolvida para a VPS com sucesso!`);
+
+  } catch (err) {
+    console.error(`[LABORATÓRIO] Erro ao processar tarefa: ${err.message}`);
+    await fetch('https://promo.wrmusicpro.com.br/collector/laboratory/submit-task', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        taskId: task.id, 
+        scrapedData: { error: err.message } 
+      })
+    });
+  } finally {
+    if (browser) await browser.close();
+  }
+}
+
+// Inicia o Polling de 5 em 5 segundos
+setInterval(pollLaboratoryTasks, 5000);
+console.log('📡 Listener do Laboratório ativado (Polling VPS a cada 5s)...');

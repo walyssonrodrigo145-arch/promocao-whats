@@ -24,13 +24,36 @@ export class CollectorController {
     return { success: true, message: 'Offer received and processing triggered.' };
   }
 
-  @Post('laboratory/analyze')
-  async analyzeManualOffer(@Body() body: { url: string }) {
-    if (!body.url) {
-      return { success: false, message: 'URL is required' };
-    }
-    const analysis = await this.collectorService.analyzeManualOffer(body.url);
-    return { success: true, analysis };
+  @Post('laboratory/analyze-request')
+  async requestAnalysis(@Body() body: { url: string }) {
+    if (!body.url) return { success: false, message: 'URL is required' };
+    const taskId = await this.collectorService.requestAnalysisTask(body.url);
+    return { success: true, taskId };
+  }
+
+  @Get('laboratory/analyze-status')
+  async getAnalysisStatus(@Query('taskId') taskId: string) {
+    if (!taskId) return { success: false, message: 'taskId is required' };
+    const status = this.collectorService.getTaskStatus(taskId);
+    return { success: true, data: status };
+  }
+
+  @Get('laboratory/pending-tasks')
+  async getPendingTasks() {
+    const task = this.collectorService.getPendingTask();
+    return { success: true, task };
+  }
+
+  @Post('laboratory/submit-task')
+  async submitTaskResult(@Body() body: { taskId: string, scrapedData: any }) {
+    if (!body.taskId || !body.scrapedData) return { success: false, message: 'Missing parameters' };
+    
+    // Roda a submissão (que chama a IA) em background para não travar o bot
+    this.collectorService.submitTaskData(body.taskId, body.scrapedData).catch(err => {
+      console.error('Error in submitTaskData:', err);
+    });
+    
+    return { success: true, message: 'Task submitted successfully. AI analysis started.' };
   }
 
   @Post('laboratory/publish')

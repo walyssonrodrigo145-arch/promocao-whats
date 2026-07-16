@@ -194,43 +194,96 @@ export class CollectorService {
     }
   }
 
-  // --- LABORATORY METHODS ---
+  private laboratoryTasks = new Map<string, any>();
 
-  async analyzeManualOffer(url: string) {
-    this.logger.log(`[Laboratory] Analyzing manual URL: ${url}`);
-    const itemId = await this.mlService.resolveUrlAndGetItemId(url);
-    if (!itemId) {
-      throw new Error(`Could not resolve ML Item ID from URL: ${url}`);
-    }
+  // Cria a tarefa e devolve o ID
+  async requestAnalysisTask(url: string) {
+    const taskId = `task_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    this.laboratoryTasks.set(taskId, {
+      id: taskId,
+      url,
+      status: 'PENDING',
+      scrapedData: null,
+      analysisResult: null,
+      error: null,
+      createdAt: Date.now()
+    });
+    this.logger.log(`[Laboratory] Task ${taskId} created for URL: ${url}`);
+    return taskId;
+  }
 
-    const itemDetails = await this.mlService.getItemDetails(itemId);
-    if (!itemDetails) {
-      throw new Error(`Could not fetch details for item ID: ${itemId}`);
-    }
+  // Verifica o status da tarefa
+  getTaskStatus(taskId: string) {
+    const task = this.laboratoryTasks.get(taskId);
+    if (!task) return { status: 'NOT_FOUND' };
+    return task;
+  }
 
-    const imageUrl = (itemDetails.pictures && itemDetails.pictures.length > 0) 
-                     ? itemDetails.pictures[0].url 
-                     : itemDetails.thumbnail;
-
-    const productInfo = {
-      title: itemDetails.title,
-      price: itemDetails.price,
-      permalink: url, // maintain the affiliate link
-      image: imageUrl
-    };
-
-    const analysisJson = await this.aiService.analyzeProduct(productInfo);
-    
-    // Inject extra fields needed for the frontend display and later publishing
-    return {
-      ...analysisJson,
-      _raw: {
-        title: productInfo.title,
-        price: productInfo.price,
-        link: productInfo.permalink,
-        image: imageUrl
+  // Pega a próxima tarefa pendente (Usado pelo Robô Garimpeiro)
+  getPendingTask() {
+    for (const [taskId, task] of this.laboratoryTasks.entries()) {
+      if (task.status === 'PENDING') {
+        task.status = 'PROCESSING';
+        this.laboratoryTasks.set(taskId, task);
+        this.logger.log(`[Laboratory] Task ${taskId} assigned to Garimpeiro`);
+        return task;
       }
-    };
+    }
+    return null;
+  }
+
+  // Recebe os dados extraídos pelo Garimpeiro e aciona a IA
+  async submitTaskData(taskId: string, scrapedData: any) {
+    const task = this.laboratoryTasks.get(taskId);
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    if (scrapedData.error) {
+      task.status = 'ERROR';
+      task.error = scrapedData.error;
+      this.laboratoryTasks.set(taskId, task);
+      return { success: true };
+    }
+
+    task.scrapedData = scrapedData;
+    this.laboratoryTasks.set(taskId, task);
+
+    this.logger.log(`[Laboratory] Received data for task ${taskId}. Analyzing with AI...`);
+    
+    try {
+      const analysisJson = await this.aiService.analyzeProduct({
+        title: scrapedData.title,
+        price: scrapedData.price,
+        permalink: scrapedData.permalink,
+        image: scrapedData.pictureUrl
+      });
+      
+      task.analysisResult = {
+        ...analysisJson,
+        _raw: {
+          title: scrapedData.title,
+          price: scrapedData.price,
+          link: scrapedData.permalink,
+          image: scrapedData.pictureUrl
+        }
+      };
+      task.status = 'COMPLETED';
+      this.laboratoryTasks.set(taskId, task);
+      this.logger.log(`[Laboratory] AI Analysis completed for task ${taskId}`);
+    } catch (err) {
+      this.logger.error(`[Laboratory] AI Analysis failed for task ${taskId}:`, err);
+      task.status = 'ERROR';
+      task.error = 'Falha na análise da IA';
+      this.laboratoryTasks.set(taskId, task);
+    }
+
+    return { success: true };
+  }
+
+  // Antigo método não será mais usado, mas vou mantê-lo ou substituí-lo
+  async analyzeManualOffer(url: string) {
+    throw new Error('Endpoint depreciado. Use a fila de tarefas.');
   }
 
   async publishManualOffer(analysisData: any) {

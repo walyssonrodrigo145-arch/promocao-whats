@@ -11,39 +11,60 @@ export default function Laboratorio() {
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState(false);
 
+  const [statusMessage, setStatusMessage] = useState("");
+
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
     
-    if (url.includes('meli.la') || url.includes('/sec/')) {
-      alert("⚠️ Atenção: O Mercado Livre bloqueia a leitura de links encurtados (meli.la ou /sec/) direto pelo servidor. Por favor, copie o LINK LONGO oficial do produto (que contém MLB) e cole aqui no Laboratório.");
-      return;
-    }
-    
     setLoading(true);
     setAnalysis(null);
     setPublished(false);
+    setStatusMessage("Enviando tarefa para o Robô Garimpeiro...");
 
     try {
-      // Usando o endpoint via rede interna ou externa (como é pro admin, pode ser localhost em dev ou ip da vps em prod)
-      // Ajuste para chamar a rota relativa já que a porta 3001 e a porta 3000 precisam se falar.
-      // A chamada será feita para a API
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://76.13.228.159:3000";
       
-      const res = await fetch(`${apiUrl}/collector/laboratory/analyze`, {
+      const reqRes = await fetch(`${apiUrl}/collector/laboratory/analyze-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
 
-      if (!res.ok) throw new Error("Falha na análise");
-      const data = await res.json();
-      setAnalysis(data.analysis);
+      if (!reqRes.ok) throw new Error("Falha ao enfileirar");
+      const { taskId } = await reqRes.json();
+
+      // Inicia o Polling
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`${apiUrl}/collector/laboratory/analyze-status?taskId=${taskId}`);
+          const statusData = await statusRes.json();
+          
+          if (statusData.data) {
+            const st = statusData.data.status;
+            if (st === 'PROCESSING') setStatusMessage("Robô Garimpeiro processando link...");
+            if (st === 'ERROR') {
+              clearInterval(pollInterval);
+              setLoading(false);
+              alert("Erro do Garimpeiro: " + statusData.data.error);
+            }
+            if (st === 'COMPLETED') {
+              clearInterval(pollInterval);
+              setAnalysis(statusData.data.analysisResult);
+              setLoading(false);
+              setStatusMessage("");
+            }
+          }
+        } catch (pollErr) {
+          console.error("Polling error", pollErr);
+        }
+      }, 2000);
+
     } catch (err) {
       alert("Erro ao analisar produto. Verifique o console.");
       console.error(err);
-    } finally {
       setLoading(false);
+      setStatusMessage("");
     }
   };
 
@@ -107,7 +128,12 @@ export default function Laboratorio() {
               disabled={loading || !url}
               className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-8 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Analisar com IA"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">{statusMessage || "Analisando com IA"}</span>
+                </>
+              ) : "Analisar com IA"}
             </button>
           </form>
         </div>
