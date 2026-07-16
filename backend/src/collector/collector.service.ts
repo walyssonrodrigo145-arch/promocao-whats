@@ -171,10 +171,12 @@ export class CollectorService {
 
       // 6. Salvar no Banco de Dados (Para a Lojinha Virtual com dados ricos)
       try {
+        const parsedPrice = typeof price === 'number' ? price : parseFloat(String(price).replace('R$', '').trim().replace(/\\./g, '').replace(',', '.')) || parseFloat(String(price)) || 0;
+
         const dbProduct = await this.prisma.produto.create({
           data: {
             titulo: title,
-            precoAtual: price,
+            precoAtual: parsedPrice,
             imagem: imageUrl || '',
             linkOriginal: link, // Usando o link reduzido
             dataPromocao: new Date(),
@@ -321,10 +323,12 @@ export class CollectorService {
       await this.evolutionService.sendTextMessage(this.TARGET_GROUP_JID, message);
     }
 
+    const parsedPrice = typeof price === 'number' ? price : parseFloat(String(price).replace('R$', '').trim().replace(/\\./g, '').replace(',', '.')) || parseFloat(String(price)) || 0;
+
     const dbProduct = await this.prisma.produto.create({
       data: {
         titulo: title,
-        precoAtual: price,
+        precoAtual: parsedPrice,
         imagem: image || '',
         linkOriginal: link,
         dataPromocao: new Date(),
