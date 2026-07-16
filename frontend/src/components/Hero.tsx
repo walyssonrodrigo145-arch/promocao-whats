@@ -3,13 +3,13 @@ import { Tag, Zap, ShieldCheck, Trophy } from 'lucide-react';
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden w-full border-b border-white/5 pb-8 pt-8 md:pb-16 md:pt-16">
+    <section className="relative overflow-hidden w-full border-b border-white/5 pb-8 pt-8 md:pb-8 md:pt-8">
       <div className="mx-auto max-w-[1600px] px-6">
-        <div className="grid gap-8 md:grid-cols-2 md:items-center">
+        <div className="grid gap-6 md:grid-cols-2 md:items-center">
           
           {/* Left: Text & Features */}
           <div className="max-w-2xl">
-            <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-white leading-[1.1]">
+            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-white leading-[1.1]">
               As melhores <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9b51e0] to-[#5b86e5]">ofertas</span><br/> garimpadas a dedo.
             </h1>
             <p className="mt-4 text-base md:text-lg leading-relaxed md:leading-8 text-zinc-400">
@@ -50,7 +50,7 @@ export function Hero() {
           
           {/* Right: 3D Image (Hidden on Mobile) */}
           <div className="hidden md:flex relative mx-auto w-full max-w-lg lg:max-w-none justify-end">
-            <div className="relative aspect-[4/3] w-full max-w-[500px]">
+            <div className="relative aspect-[4/3] w-full max-w-[350px]">
               <Image
                 src="/images/cart.jpg"
                 alt="Carrinho de compras 3D com logo WR"
