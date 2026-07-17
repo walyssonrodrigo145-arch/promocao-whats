@@ -12,14 +12,14 @@ const HISTORY_FILE = './historico_produtos.json';
 let isRunning = false;
 let globalBrowser = null;
 
-async function runScraper() {
+async function runScraper(nicho = null) {
   if (isRunning) {
     console.log('⏳ O robô já está em execução no momento. Pulando este ciclo.');
     return;
   }
   
   isRunning = true;
-  console.log('\n🤖 [START] Garimpeiro de Afiliados Iniciado!');
+  console.log(`\n🤖 [START] Garimpeiro de Afiliados Iniciado! ${nicho ? 'Foco: ' + nicho : 'Geral'}`);
   
   // BAIXA O APRENDIZADO DIÁRIO (TREINAMENTOS 4 A 8)
   let aprendizadoDiario = "";
@@ -57,6 +57,25 @@ async function runScraper() {
     console.log('🔎 Acessando a Central de Afiliados do Mercado Livre...');
     await page.goto('https://www.mercadolivre.com.br/afiliados/hub?is_affiliate=true#menu-user', { waitUntil: 'networkidle2', timeout: 60000 });
     
+    // Se um nicho foi especificado, faz a busca no painel de afiliados
+    if (nicho) {
+        console.log(`🎯 Nicho Específico Solicitado: "${nicho}". Buscando no painel...`);
+        try {
+            // A barra de pesquisa de afiliados geralmente é um input do tipo search ou tem placeholder
+            await page.waitForSelector('input[type="search"], input[placeholder*="Buscar"]', { timeout: 10000 });
+            const searchInputs = await page.$$('input[type="search"], input[placeholder*="Buscar"]');
+            if (searchInputs.length > 0) {
+                await searchInputs[0].click({ clickCount: 3 }); // Seleciona tudo
+                await searchInputs[0].type(nicho, { delay: 100 });
+                await page.keyboard.press('Enter');
+                console.log('⏳ Aguardando resultados da busca...');
+                await new Promise(r => setTimeout(r, 4000));
+            }
+        } catch (err) {
+            console.log(`⚠️ Não foi possível usar a barra de busca para "${nicho}". Prosseguindo com recomendações gerais.`);
+        }
+    }
+
     console.log('👀 Aguardando o carregamento da lista de produtos (carregando um lote grande)...');
     
     // Rola a página para forçar o carregamento dos itens da lista
@@ -402,40 +421,41 @@ async function runScraper() {
 const SCHEDULE_REGULAR = '0 8,10,12,14,16,18,20 * * *';
 const SCHEDULE_TESTE = '15 0 * * *'; // Horário de teste (00:15)
 
+// ============================================================================
+// AGENDAMENTOS ESTRATÉGICOS DE VENDAS (Segunda a Domingo)
+// ============================================================================
 console.log('====================================================');
-console.log('🕒 ROBÔ GARIMPEIRO NO MODO TESTE IMEDIATO (Sem trava de horário)');
+console.log('🕒 ROBÔ GARIMPEIRO ATIVO - ESTRATÉGIA NICHADA (TESTE/PRODUÇÃO)');
 console.log('⚠️  Deixe esta janela preta aberta (se fechar, ele para de rodar).');
 console.log('====================================================\n');
-console.log('🚀 Iniciando varredura IMEDIATAMENTE...');
 
-// Roda na mesma hora que abrir o arquivo para testes:
-runScraper();
-
-/* COMENTADO TEMPORARIAMENTE PARA TESTES
-cron.schedule(SCHEDULE_REGULAR, () => {
-  runScraper();
+// 1. 09:30 - O "Café e Celular"
+cron.schedule('30 9 * * *', () => {
+  console.log('⏰ Horário Estratégico (09:30) - Iniciando garimpo de Casa/Utilidades/Beleza');
+  runScraper("Casa, Decoração e Utilidades Domésticas");
 });
 
-cron.schedule('15 00 * * *', () => {
-  console.log('⏰ Horário de TESTE atingido (00:15)! Iniciando...');
-  runScraper();
+// 2. 12:15 - O "Almoço do Consumidor"
+cron.schedule('15 12 * * *', () => {
+  console.log('⏰ Horário Estratégico (12:15) - Iniciando garimpo de Relâmpagos/Diversos');
+  runScraper(); // Sem nicho específico, foca no que estiver mais forte no dia (ofertas gerais do ML)
 });
 
-cron.schedule('10 12 * * *', () => {
-  console.log('⏰ Horário de TESTE atingido (12:10)! Iniciando...');
-  runScraper();
+// 3. 18:30 - O "Fim de Expediente"
+cron.schedule('30 18 * * *', () => {
+  console.log('⏰ Horário Estratégico (18:30) - Iniciando garimpo de Moda e Esportes');
+  runScraper("Moda, Calçados e Esportes");
 });
 
-cron.schedule('32 15 * * *', () => {
-  console.log('⏰ Horário de TESTE atingido (15:32)! Iniciando...');
-  runScraper();
+// 4. 20:30 - O "Horário Nobre"
+cron.schedule('30 20 * * *', () => {
+  console.log('⏰ Horário Estratégico (20:30) - Iniciando garimpo de Alto Ticket (Eletrônicos)');
+  runScraper("Eletrônicos, Smartphones, TVs e Informática");
 });
 
-cron.schedule('46 15 * * *', () => {
-  console.log('⏰ Horário de TESTE atingido (15:46)! Iniciando...');
-  runScraper();
-});
-*/
+// TESTE IMEDIATO
+console.log('🚀 Iniciando varredura de TESTE IMEDIATO (Nichos Mistos)...');
+runScraper("Eletrônicos"); // Pode mudar aqui para testar outros nichos agora
 
 // ============================================================================
 // LABORATORY QUEUE POLLING
