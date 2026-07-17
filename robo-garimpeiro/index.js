@@ -487,9 +487,6 @@ cron.schedule('15 2 * * *', () => {
 
 // A execução imediata foi desativada para manter a fidelidade aos horários da estratégia.
 console.log('⏳ O Robô está em sentinela aguardando o próximo horário agendado...');
-// Executando agora mesmo para teste forçado a pedido do usuário
-console.log('🚀 Iniciando varredura imediata de teste...');
-runScraper();
 
 // ============================================================================
 // LABORATORY QUEUE POLLING
