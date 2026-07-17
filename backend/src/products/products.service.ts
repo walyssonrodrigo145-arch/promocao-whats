@@ -31,4 +31,17 @@ export class ProductsService {
       }
     });
   }
+
+  async remove(id: string) {
+    // Primeiro exclui os links de afiliado relacionados para evitar erro de Foreign Key
+    await this.prisma.linkAfiliado.deleteMany({
+      where: { produtoId: id }
+    });
+
+    // Depois exclui o produto
+    return this.prisma.produto.delete({
+      where: { id }
+    });
+  }
 }
+
