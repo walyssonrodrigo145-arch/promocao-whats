@@ -3,15 +3,15 @@ import Link from 'next/link';
 
 export function Sidebar({ currentCategory }: { currentCategory?: string }) {
   const categories = [
-    { name: 'Todas as ofertas', icon: Home, count: 12482 },
-    { name: 'Eletrônicos', icon: Smartphone, count: 324 },
-    { name: 'Casa e Decoração', icon: Sofa, count: 215 },
-    { name: 'Beleza e Saúde', icon: Heart, count: 189 },
-    { name: 'Moda', icon: Shirt, count: 125 },
-    { name: 'Esportes', icon: Dumbbell, count: 41 },
-    { name: 'Informática', icon: Monitor, count: 88 },
-    { name: 'Brinquedos', icon: Gamepad2, count: 62 },
-    { name: 'Automotivo', icon: Car, count: 34 },
+    { name: 'Todas as ofertas', icon: Home },
+    { name: 'Eletrônicos', icon: Smartphone },
+    { name: 'Casa e Decoração', icon: Sofa },
+    { name: 'Beleza e Saúde', icon: Heart },
+    { name: 'Moda', icon: Shirt },
+    { name: 'Esportes', icon: Dumbbell },
+    { name: 'Informática', icon: Monitor },
+    { name: 'Brinquedos', icon: Gamepad2 },
+    { name: 'Automotivo', icon: Car },
   ];
 
   return (
@@ -45,11 +45,6 @@ export function Sidebar({ currentCategory }: { currentCategory?: string }) {
                   <Icon className={`h-4 w-4 lg:h-5 lg:w-5 transition-transform group-hover:scale-110 ${isActive ? 'text-purple-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
                   <span className="whitespace-nowrap font-semibold">{category.name}</span>
                 </div>
-                {!isTodas && (
-                  <span className={`hidden lg:block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isActive ? 'bg-purple-500/20 text-purple-300' : 'bg-white/5 text-zinc-500 group-hover:bg-white/10 group-hover:text-zinc-400'}`}>
-                    {category.count}
-                  </span>
-                )}
               </Link>
             );
           })}

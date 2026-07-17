@@ -40,9 +40,6 @@ export default async function Home({
   const q = typeof params.q === 'string' ? params.q : undefined;
   const products = await getProducts(categoria, q);
 
-  // Mock live count
-  const liveCount = (Math.floor(Math.random() * 500) + 12000).toLocaleString('pt-BR');
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans selection:bg-purple-500/30">
       
@@ -90,7 +87,7 @@ export default async function Home({
               <div className="flex items-center gap-2 bg-[#111111] border border-white/10 rounded-full px-4 py-1.5 w-fit">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                 <span className="text-xs font-bold text-zinc-300">
-                  <span className="text-emerald-400">{liveCount}</span> ofertas encontradas
+                  <span className="text-emerald-400">{products.length}</span> ofertas encontradas
                 </span>
                 <span className="text-zinc-600 px-1">•</span>
                 <span className="text-[10px] text-zinc-500">Atualizado agora</span>
