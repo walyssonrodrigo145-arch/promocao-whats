@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Heart, Star, ExternalLink, ShieldCheck, Sparkles, TrendingDown, Clock } from 'lucide-react';
+import { DeleteButton } from './DeleteButton';
 
 interface ProductCardProps {
   produto: any;
@@ -32,6 +33,7 @@ export function ProductCard({ produto }: ProductCardProps) {
             -{discountPercentage}%
           </div>
         </div>
+        <DeleteButton produtoId={produto.id} />
         <button className="pointer-events-auto rounded-full bg-black/40 p-1.5 text-zinc-400 backdrop-blur-md transition-colors hover:text-red-500 hover:bg-black/60">
           <Heart className="h-4 w-4" />
         </button>
