@@ -6,11 +6,13 @@ import { BadgePercent, ShieldCheck, Tag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-async function getProducts(category?: string) {
+async function getProducts(category?: string, q?: string) {
   try {
-    const url = category 
-      ? `http://api:3000/products?category=${encodeURIComponent(category)}`
-      : "http://api:3000/products";
+    const params = new URLSearchParams();
+    if (category) params.append('category', category);
+    if (q) params.append('q', q);
+    
+    const url = `http://api:3000/products${params.toString() ? `?${params.toString()}` : ''}`;
       
     const res = await fetch(url, { 
       next: { revalidate: 60 }
@@ -35,7 +37,8 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const categoria = typeof params.categoria === 'string' ? params.categoria : undefined;
-  const products = await getProducts(categoria);
+  const q = typeof params.q === 'string' ? params.q : undefined;
+  const products = await getProducts(categoria, q);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans selection:bg-purple-500/30">
