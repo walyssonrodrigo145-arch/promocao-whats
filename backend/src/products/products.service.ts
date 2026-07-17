@@ -33,8 +33,20 @@ export class ProductsService {
   }
 
   async remove(id: string) {
-    // Primeiro exclui os links de afiliado relacionados para evitar erro de Foreign Key
+    // Primeiro exclui todas as dependências do produto para evitar erro de Foreign Key
+    await this.prisma.clique.deleteMany({
+      where: { linkAfiliado: { produtoId: id } }
+    });
+
     await this.prisma.linkAfiliado.deleteMany({
+      where: { produtoId: id }
+    });
+    
+    await this.prisma.promocao.deleteMany({
+      where: { produtoId: id }
+    });
+
+    await this.prisma.historicoPreco.deleteMany({
       where: { produtoId: id }
     });
 
@@ -44,4 +56,5 @@ export class ProductsService {
     });
   }
 }
+
 
