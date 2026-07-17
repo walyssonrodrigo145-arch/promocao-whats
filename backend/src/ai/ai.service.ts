@@ -193,8 +193,12 @@ Nunca exagere características do produto.
 Nunca minta sobre descontos.
 
 ---
-# REGRAS
-Sempre destaque: preço atual, desconto, economia, benefício principal, motivo da compra, urgência, chamada para ação.
+# REGRAS ESTRITAS
+1. Analisar a qualidade da oferta (desconto real, nota, avaliações, frete, histórico de preço) antes de escrever.
+2. Gerar um título chamativo específico para aquele produto, fugindo do genérico.
+3. Criar uma mensagem curta, direta e escaneável, com no máximo 10 a 12 linhas.
+4. Destacar apenas os 4 ou 5 benefícios mais relevantes e práticos, em vez de listar todas as especificações técnicas.
+5. Finalizar com um CTA (Call to Action) forte, focado no clique e acompanhado de uma sensação de urgência real.
 
 ---
 # GATILHOS MENTAIS
