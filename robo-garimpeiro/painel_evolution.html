@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conexão WhatsApp - WR Promoções</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #38bdf8;
+        }
+        p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .qr-container {
+            background-color: white;
+            padding: 16px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 24px;
+            min-height: 250px;
+            min-width: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .status {
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .status.connected {
+            background-color: #059669;
+            color: white;
+        }
+        .status.disconnected {
+            background-color: #dc2626;
+            color: white;
+        }
+        .status.loading {
+            background-color: #ca8a04;
+            color: white;
+        }
+        button {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background-color: #7dd3fc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Conexão do Garimpeiro</h1>
+        <p>Acesse ou reconecte seu WhatsApp da VPS.</p>
+
+        <div class="qr-container" id="qrContainer">
+            <span style="color: #64748b;">Carregando QR Code...</span>
+        </div>
+
+        <div id="statusBadge" class="status loading">Analisando conexão...</div>
+        
+        <button onclick="carregar()">Atualizar QR Code</button>
+    </div>
+
+    <script>
+        const API_URL = "http://76.13.228.159:8080/instance/connect/wrmusic";
+        const API_KEY = "minha_chave_secreta_123";
+
+        async function carregar() {
+            const qrContainer = document.getElementById('qrContainer');
+            const statusBadge = document.getElementById('statusBadge');
+            
+            statusBadge.className = 'status loading';
+            statusBadge.innerText = 'Buscando servidor...';
+            qrContainer.innerHTML = '<span style="color: #64748b;">Aguarde...</span>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    headers: { 'apikey': API_KEY }
+                });
+
+                if (response.status === 401) {
+                    statusBadge.className = 'status disconnected';
+                    statusBadge.innerText = 'Falha de Autenticação (Chave errada)';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.base64) {
+                    qrContainer.innerHTML = `<img src="${data.base64}" alt="QR Code">`;
+                    statusBadge.className = 'status disconnected';
+                    statusBadge.innerText = 'Desconectado! Leia o QR Code';
+                } else if (data.instance && data.instance.state === 'open') {
+                    qrContainer.innerHTML = `<span style="color: #10b981; font-weight: bold; font-size: 18px;">✅ Tudo Pronto!</span><br><br><span style="color: #64748b;">Seu WhatsApp está logado.</span>`;
+                    statusBadge.className = 'status connected';
+                    statusBadge.innerText = 'CONECTADO E PRONTO';
+                } else {
+                    qrContainer.innerHTML = `<span style="color: #ef4444;">Resposta desconhecida da API.</span>`;
+                }
+
+            } catch (error) {
+                console.error(error);
+                statusBadge.className = 'status disconnected';
+                statusBadge.innerText = 'Servidor VPS Fora do Ar!';
+                qrContainer.innerHTML = `<span style="color: #ef4444;">Não foi possível acessar ${API_URL}</span>`;
+            }
+        }
+
+        carregar();
+        setInterval(carregar, 15000); // Atualiza a cada 15 segundos
+    </script>
+</body>
+</html>

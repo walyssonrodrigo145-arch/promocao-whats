@@ -1,42 +1,242 @@
 [
-  "Panificadora Automática Master Bread Mondial 700w Npf-53 Preto 127v",
-  "Fritadeira Air Fryer Forno Oven 12l, Mondial, 2000w - Afon-12l-bi Preto/inox 127v",
-  "Coturno Infantil Menina Bota Menina Infantil Bota Feminina",
-  "Balança Digital Corporal Bioimpedância Aplicativo Bluetooth Relaxmedic Preta",
-  "Luva De Látex Descartável Inoven Branca Com Pó Tamanho M Caixa 100 Unid Branco",
-  "Kit 2 Jaquetas Corta Vento Impermeável Liso Unissex",
-  "Lavadora Lava Jato Portátil Pressão 2 Baterias + Maleta Preto 127/220v 50 Hz X 60 Hz",
-  "Suporte Tv Parede Tri Articulado 10 A 60  Led Oled Qled Reforçado 30kg",
-  "Tapete Higiênico Para Cachorro 50 Unidades 60x55cm Com Gel Absorvente Fralda Manta Pet Cão Branco Branco",
-  "Parafusadeira Furadeira C/ 2 Baterias Maleta Kit Completo Led Eixo Flexível Vários Níveis Torque Simake Amarelo 127/220v 60 Hz",
-  "Lavadora Semiautomática Lcs 10kg Branca Colormaq 110v Branco 127v",
-  "Notebook Samsung Galaxy Book4 Intel® U300 (1.20 Ghz, Até 4.4ghz, 8 Mb L3 Cache), Windows 11 Home, 8gb, 256gb Ssd, Uhd Graphics, 15.6'' Full Hd Led, 1.55kg Grafite",
-  "Jaqueta Puffer De Frio Intenso Blusa Impermeável Inverno",
-  "Smart Tv 32 Philco P32vik Roku Led Dolby Audio Hdr Wi-fi 110/220v",
-  "Smart Tv Samsung 32'' Hd Tizen Hdr Wi-fi Hdmi Monitor Bivolt Preta Preto",
-  "Kit 10 Cuecas Boxer Lupo Algodão Confortável Box Original",
-  "Smartphone Motorola Edge 60 Neo 5g - 256gb 24gb (12gb Ram + 12gb Ram Boost) 50mp Sony Camera Moto Ai E Tela 1.5k Super Hd - Cinza",
-  "Kit 70 Figurinhas Do Álbum Copa Do Mundo 2026 Pronta Entrega",
-  "Creme Multirreparador Calmante, Cicaplast Baume B5+ La Roche-posay, 40ml Todo Tipo De Pele Dia/noite",
-  "Smartphone Motorola Moto G35 5g - 256gb 12gb (4gb Ram+8gb Ram Boost) E Camera 50mp Com Ai Nfc Tela 6.7  Com Superbrilho - Cinza",
-  "Smart Tv Tcl 40 Polegadas Full Hd Qled S5k Wifi Bluetooth Google Tv 2 Hdmi Hdr10 Dolby Audio 40s5k",
-  "Monitor LG Ultragear 27g411a-b 27 ,fhd, 144hz, 1ms (mbr), Nvidia G-sync, Amd Freesync, Hdr10 Preto 127/220v",
-  "Mochila Tática Militar 50l Masculina Reforçada Impermeável Viagem Camping Pesca Com Patch Bandeira Brasil Bagear Preto Liso",
-  "Kit 350 Figurinhas Do Álbum Copa Do Mundo 2026- 50 Envelopes",
-  "Tablet Samsung Galaxy Tab A11+, 128gb, 6gb Ram, Tela De 11 , Câmera Traseira 8mp, Wifi, Android 16 Cinza",
-  "Tênis Masculino Feminino Kappa Park 2.0 Original",
-  "Smartphone Motorola Moto G15 - 256gb 12gb (4gb Ram+8gb Ram Boost) E Camera 50mp Com Ai E Night Vision Bateria De 5200 Mah Tela Fhd+ 6.7 Com Superbrilho Nfc - Grafite",
-  "Kit 10 Potes Herméticos Vidro 640ml Starhouse Marmita Forno Micro-ondas Airfryer Com 4 Travas De Super Vedação",
-  "Kit Body Splash Masculino Barbarius + Enigma + Midtown 200ml",
-  "Kit 10 Pote De Vidro Marmita Hermético 370ml Freezer Fitness Rishon Transparente",
-  "Notebook Positivo Vision C15m Intel Celeron N4500 Windows 11 Home 4gb Ram 128gb Emmc Tela 15  Full Hd Ips Antirreflexo - Minitela E Tecla Copilot - Cinza",
-  "Purificador De Água Gelada Fria E Natural Eletrônico Placa Compacto Electrolux Pe12g Com Filtro Carvão 6 Meses Ou 3000l Painel Touch Cinza 127/220v",
-  "Jaqueta De Couro Masculino Slim Resistente",
-  "Micro-ondas Electrolux De Bancada Branco Com Função Tira Odor E Manter Aquecido 34l Meo44 127v",
-  "Impressora Multifuncional Cor Epson Ecotank L3250 Preto 127/220v",
-  "Máquina De Lavar 15kg Electrolux Premium Care Com Cesto Inox, Jet&clean E Time Control Lec15 127v Branco",
-  "Creatina Monohidratada Pura 1kg Dark Lab Unidade Sem Sabor",
-  "Bicicleta Ergométrica Fitness Para Cardio E Musculação Com Base Cor Preto E Vermelho 6kg Inercia Marca Sevenfit",
-  "Fritadeira Elétrica Afon-12l-bg Forno Oven 12 Litros Preto Mondial 127v",
-  "Smartphone Motorola Edge 60 Fusion 5g - 256gb 24gb (8gb Ram+16gb Ram Boost) Tela Quad-curve Moto Ai 50mp Sony Camera Ultrarresistencia Militar Ip68 + Ip69 - Mocha Mousse"
+  {
+    "title": "Panificadora Automática Master Bread Mondial 700w Npf-53 Preto 127v",
+    "link": null
+  },
+  {
+    "title": "Fritadeira Air Fryer Forno Oven 12l, Mondial, 2000w - Afon-12l-bi Preto/inox 127v",
+    "link": null
+  },
+  {
+    "title": "Coturno Infantil Menina Bota Menina Infantil Bota Feminina",
+    "link": null
+  },
+  {
+    "title": "Balança Digital Corporal Bioimpedância Aplicativo Bluetooth Relaxmedic Preta",
+    "link": null
+  },
+  {
+    "title": "Luva De Látex Descartável Inoven Branca Com Pó Tamanho M Caixa 100 Unid Branco",
+    "link": null
+  },
+  {
+    "title": "Kit 2 Jaquetas Corta Vento Impermeável Liso Unissex",
+    "link": null
+  },
+  {
+    "title": "Lavadora Lava Jato Portátil Pressão 2 Baterias + Maleta Preto 127/220v 50 Hz X 60 Hz",
+    "link": null
+  },
+  {
+    "title": "Suporte Tv Parede Tri Articulado 10 A 60  Led Oled Qled Reforçado 30kg",
+    "link": null
+  },
+  {
+    "title": "Tapete Higiênico Para Cachorro 50 Unidades 60x55cm Com Gel Absorvente Fralda Manta Pet Cão Branco Branco",
+    "link": null
+  },
+  {
+    "title": "Parafusadeira Furadeira C/ 2 Baterias Maleta Kit Completo Led Eixo Flexível Vários Níveis Torque Simake Amarelo 127/220v 60 Hz",
+    "link": null
+  },
+  {
+    "title": "Lavadora Semiautomática Lcs 10kg Branca Colormaq 110v Branco 127v",
+    "link": null
+  },
+  {
+    "title": "Notebook Samsung Galaxy Book4 Intel® U300 (1.20 Ghz, Até 4.4ghz, 8 Mb L3 Cache), Windows 11 Home, 8gb, 256gb Ssd, Uhd Graphics, 15.6'' Full Hd Led, 1.55kg Grafite",
+    "link": null
+  },
+  {
+    "title": "Jaqueta Puffer De Frio Intenso Blusa Impermeável Inverno",
+    "link": null
+  },
+  {
+    "title": "Smart Tv 32 Philco P32vik Roku Led Dolby Audio Hdr Wi-fi 110/220v",
+    "link": null
+  },
+  {
+    "title": "Smart Tv Samsung 32'' Hd Tizen Hdr Wi-fi Hdmi Monitor Bivolt Preta Preto",
+    "link": null
+  },
+  {
+    "title": "Kit 10 Cuecas Boxer Lupo Algodão Confortável Box Original",
+    "link": null
+  },
+  {
+    "title": "Smartphone Motorola Edge 60 Neo 5g - 256gb 24gb (12gb Ram + 12gb Ram Boost) 50mp Sony Camera Moto Ai E Tela 1.5k Super Hd - Cinza",
+    "link": null
+  },
+  {
+    "title": "Kit 70 Figurinhas Do Álbum Copa Do Mundo 2026 Pronta Entrega",
+    "link": null
+  },
+  {
+    "title": "Creme Multirreparador Calmante, Cicaplast Baume B5+ La Roche-posay, 40ml Todo Tipo De Pele Dia/noite",
+    "link": null
+  },
+  {
+    "title": "Smartphone Motorola Moto G35 5g - 256gb 12gb (4gb Ram+8gb Ram Boost) E Camera 50mp Com Ai Nfc Tela 6.7  Com Superbrilho - Cinza",
+    "link": null
+  },
+  {
+    "title": "Smart Tv Tcl 40 Polegadas Full Hd Qled S5k Wifi Bluetooth Google Tv 2 Hdmi Hdr10 Dolby Audio 40s5k",
+    "link": null
+  },
+  {
+    "title": "Monitor LG Ultragear 27g411a-b 27 ,fhd, 144hz, 1ms (mbr), Nvidia G-sync, Amd Freesync, Hdr10 Preto 127/220v",
+    "link": null
+  },
+  {
+    "title": "Mochila Tática Militar 50l Masculina Reforçada Impermeável Viagem Camping Pesca Com Patch Bandeira Brasil Bagear Preto Liso",
+    "link": null
+  },
+  {
+    "title": "Kit 350 Figurinhas Do Álbum Copa Do Mundo 2026- 50 Envelopes",
+    "link": null
+  },
+  {
+    "title": "Tablet Samsung Galaxy Tab A11+, 128gb, 6gb Ram, Tela De 11 , Câmera Traseira 8mp, Wifi, Android 16 Cinza",
+    "link": null
+  },
+  {
+    "title": "Tênis Masculino Feminino Kappa Park 2.0 Original",
+    "link": null
+  },
+  {
+    "title": "Smartphone Motorola Moto G15 - 256gb 12gb (4gb Ram+8gb Ram Boost) E Camera 50mp Com Ai E Night Vision Bateria De 5200 Mah Tela Fhd+ 6.7 Com Superbrilho Nfc - Grafite",
+    "link": null
+  },
+  {
+    "title": "Kit 10 Potes Herméticos Vidro 640ml Starhouse Marmita Forno Micro-ondas Airfryer Com 4 Travas De Super Vedação",
+    "link": null
+  },
+  {
+    "title": "Kit Body Splash Masculino Barbarius + Enigma + Midtown 200ml",
+    "link": null
+  },
+  {
+    "title": "Kit 10 Pote De Vidro Marmita Hermético 370ml Freezer Fitness Rishon Transparente",
+    "link": null
+  },
+  {
+    "title": "Notebook Positivo Vision C15m Intel Celeron N4500 Windows 11 Home 4gb Ram 128gb Emmc Tela 15  Full Hd Ips Antirreflexo - Minitela E Tecla Copilot - Cinza",
+    "link": null
+  },
+  {
+    "title": "Purificador De Água Gelada Fria E Natural Eletrônico Placa Compacto Electrolux Pe12g Com Filtro Carvão 6 Meses Ou 3000l Painel Touch Cinza 127/220v",
+    "link": null
+  },
+  {
+    "title": "Jaqueta De Couro Masculino Slim Resistente",
+    "link": null
+  },
+  {
+    "title": "Micro-ondas Electrolux De Bancada Branco Com Função Tira Odor E Manter Aquecido 34l Meo44 127v",
+    "link": null
+  },
+  {
+    "title": "Impressora Multifuncional Cor Epson Ecotank L3250 Preto 127/220v",
+    "link": null
+  },
+  {
+    "title": "Máquina De Lavar 15kg Electrolux Premium Care Com Cesto Inox, Jet&clean E Time Control Lec15 127v Branco",
+    "link": null
+  },
+  {
+    "title": "Creatina Monohidratada Pura 1kg Dark Lab Unidade Sem Sabor",
+    "link": null
+  },
+  {
+    "title": "Bicicleta Ergométrica Fitness Para Cardio E Musculação Com Base Cor Preto E Vermelho 6kg Inercia Marca Sevenfit",
+    "link": null
+  },
+  {
+    "title": "Fritadeira Elétrica Afon-12l-bg Forno Oven 12 Litros Preto Mondial 127v",
+    "link": null
+  },
+  {
+    "title": "Smartphone Motorola Edge 60 Fusion 5g - 256gb 24gb (8gb Ram+16gb Ram Boost) Tela Quad-curve Moto Ai 50mp Sony Camera Ultrarresistencia Militar Ip68 + Ip69 - Mocha Mousse",
+    "link": null
+  },
+  {
+    "title": "Serra Mármore 4.3/8 1300w C/ 2discos 4100nh3zx2 Makita 127v",
+    "link": null
+  },
+  {
+    "title": "Carregador Inteligente De Bateria Automotiva Several Importados 12v Portátil Rápido Para Carro Moto E Veículos Several",
+    "link": null
+  },
+  {
+    "title": "Kit Com 10 Cuecas Boxer Masculina Microfibra Original ",
+    "link": null
+  },
+  {
+    "title": "Mini Ventilador Soprador Ar Turbo 130000rpm Sem Fio Recarregável Usb 3 Níveis Jato Forte Portátil Multiuso Limpeza Teclado Carro Acende Churrasqueira Simake Preto 127/220v",
+    "link": null
+  },
+  {
+    "title": "Fones De Ouvido Usb-c Tipo C Com Microfone Integrado Som Estéreo Alta Qualidade Controle De Chamadas Compatível Com... Branco",
+    "link": null
+  },
+  {
+    "title": "Bota Capa Feminina Cano Longo Salto Alto Bloco Bico Fino Preto 37 Br",
+    "link": null
+  },
+  {
+    "title": "Carregador Compativel Com iPhone 8 X Xr 11 12 13 14 Pro Max Turbo Fonte Tipo C Boyu Cell Branco",
+    "link": null
+  },
+  {
+    "title": "Kit Halter 6 Em 1 Musculação Até 20kg Ajustável Anilha Preto-vermelho",
+    "link": null
+  },
+  {
+    "title": "Jogo De Panelas Revestimento Cerâmico Para Fogão Tradicional E Indução Florença Vanila Veneza Antiaderente 5 Peças Verde",
+    "link": null
+  },
+  {
+    "title": "Chinelo Kenner Masculino Kivah Full Force Preto Sem Desenho 40",
+    "link": null
+  },
+  {
+    "title": "Esmerilhadeira Lixadeira Angular 880w 115mm 11000rpm",
+    "link": null
+  },
+  {
+    "title": "Vestido Feminino Tule Brilhante Glitter Manga Longa Festa Preto Brilho 38 A 42",
+    "link": null
+  },
+  {
+    "title": "Câmera Lâmpada B-MAX Wifi 360º Infravermelho IP44 1080p Segurança",
+    "link": null
+  },
+  {
+    "title": "Fita Dupla Face Scotch 3M, 24mm x 2m Fixa Forte, Fixação Extrema",
+    "link": null
+  },
+  {
+    "title": "Mouse Sem Fio Recarregável Wireless Optico Led Rgb Ergonômico Sem Fio Para Pc Desktop Notebook Tablet Smartphone Homeroarte Preto",
+    "link": null
+  },
+  {
+    "title": "Kit Renu Fresh Solução Multiuso para Lentes 355ml 120ml Bausch + Lomb 475 ml",
+    "link": null
+  },
+  {
+    "title": "Chave T 10mm Canhão Longa Remover Parafuso Agitador Universal 62cm Lm08 Lm06 Electrolux Brastemp Consul Fazer Limpeza Máquina De Lavar Killrex",
+    "link": null
+  },
+  {
+    "title": "Kit 10 Spot Luminária 7w Qd Rd Frio 6500k Quente 3000k",
+    "link": null
+  },
+  {
+    "title": "Mini Ventilador Soprador Ar Turbo 130000RPM Sem Fio Recarregável USB 3 Níveis Jato Forte Portátil Multiuso Limpeza Teclado Carro Acende Churrasqueira Simake",
+    "link": "https://meli.la/2FaHiuY"
+  },
+  {
+    "title": "Kit 2 Refletor Super Led 400w Ip67 Holofote Bivolt Prova D'água Branco Frio 6500k Preto",
+    "link": "https://meli.la/2TReghc"
+  }
 ]

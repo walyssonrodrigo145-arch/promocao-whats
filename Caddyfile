@@ -1,0 +1,11 @@
+wrpromo.shop, www.wrpromo.shop {
+	# Roteamento da API
+	handle_path /api/* {
+		reverse_proxy api:3000
+	}
+
+	# Roteamento do Frontend (todo o resto)
+	handle {
+		reverse_proxy web:3001
+	}
+}

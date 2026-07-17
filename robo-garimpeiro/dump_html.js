@@ -15,16 +15,15 @@ async function dumpHTML() {
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
   try {
-    console.log('Acessando hub de afiliados...');
-    await page.goto('https://www.mercadolivre.com.br/afiliados/hub?is_affiliate=true#menu-user', { waitUntil: 'networkidle2', timeout: 60000 });
+    console.log('Acessando página do produto...');
+    await page.goto('https://produto.mercadolivre.com.br/MLB-3559381665-teclado-e-mouse-sem-fio-dell-km3322w-preto-_JM', { waitUntil: 'networkidle2', timeout: 60000 });
     
-    // Rola um pouco
-    await page.evaluate(() => window.scrollBy(0, 1000));
-    await new Promise(r => setTimeout(r, 5000));
+    // Espera o título carregar
+    await page.waitForSelector('.ui-pdp-title');
     
     const html = await page.evaluate(() => document.body.innerHTML);
-    fs.writeFileSync('affiliate_hub.html', html);
-    console.log('HTML dumped successfully.');
+    fs.writeFileSync('product.html', html);
+    console.log('Product HTML dumped successfully.');
   } catch (err) {
     console.error(err);
   } finally {

@@ -39,6 +39,7 @@ async function runScraper(nicho = null, discountThreshold = 15) {
 
   const browser = await puppeteer.launch({
     headless: false, // <- TEM QUE SER FALSE. O Mercado Livre bloqueia o modo fantasma!
+    protocolTimeout: 0,
     defaultViewport: null,
     userDataDir: './perfil_chrome_robo',
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
@@ -529,6 +530,7 @@ async function processLaboratoryTask(task) {
     if (!browser) {
         browser = await puppeteer.launch({
           headless: false,
+          protocolTimeout: 0,
           defaultViewport: null,
           userDataDir: './perfil_chrome_robo',
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']

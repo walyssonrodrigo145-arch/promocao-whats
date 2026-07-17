@@ -131,6 +131,23 @@ export class CollectorService {
          }
       }
 
+      // ---- DEDUPLICATION CHECK START ----
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const recentPost = await this.prisma.produto.findFirst({
+        where: {
+          linkOriginal: link,
+          dataPromocao: {
+            gte: sevenDaysAgo
+          }
+        }
+      });
+
+      if (recentPost) {
+        this.logger.warn(`[Deduplication] Product with link ${link} was already posted on ${recentPost.dataPromocao}. Skipping!`);
+        return;
+      }
+      // ---- DEDUPLICATION CHECK END ----
+
       const productInfo = { title, price, permalink: link, image: imageUrl };
       
       let analysisJson: any = offer.aiEvaluation;
