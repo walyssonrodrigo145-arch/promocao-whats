@@ -10,6 +10,7 @@ const MAX_OFFERS_TO_SCRAPE = 10;
 const HISTORY_FILE = './historico_produtos.json';
 
 let isRunning = false;
+let globalBrowser = null;
 
 async function runScraper() {
   if (isRunning) {
@@ -43,6 +44,8 @@ async function runScraper() {
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
   });
   
+  globalBrowser = browser;
+
   // Garantir permissão para ler/escrever na área de transferência (Clipboard)
   const context = browser.defaultBrowserContext();
   await context.overridePermissions('https://www.mercadolivre.com.br', ['clipboard-read', 'clipboard-write']);
@@ -387,7 +390,8 @@ async function runScraper() {
     console.error('\n❌ Erro Geral no Garimpo:', error.message);
   } finally {
     console.log('🧹 Encerrando as atividades do Robô e fechando as telas...');
-    await browser.close();
+    if (globalBrowser) await globalBrowser.close().catch(() => {});
+    globalBrowser = null;
     console.log('🏁 Operação Concluída.');
     isRunning = false;
   }
@@ -460,16 +464,22 @@ async function pollLaboratoryTasks() {
 }
 
 async function processLaboratoryTask(task) {
-  let browser;
+  let browser = globalBrowser;
+  let isOwnBrowser = false;
+  let page = null;
+  
   try {
-    browser = await puppeteer.launch({
-      headless: false, // <- TEM QUE SER FALSE. ML bloqueia modo fantasma.
-      defaultViewport: null,
-      userDataDir: './perfil_chrome_robo',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
-    });
+    if (!browser) {
+        browser = await puppeteer.launch({
+          headless: false,
+          defaultViewport: null,
+          userDataDir: './perfil_chrome_robo',
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--start-maximized']
+        });
+        isOwnBrowser = true;
+    }
     
-    const page = await browser.newPage();
+    page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     
     let finalUrl = task.url;
@@ -633,14 +643,16 @@ async function processLaboratoryTask(task) {
       })
     });
   } finally {
-    if (browser) {
+    if (page) await page.close().catch(() => {});
+    
+    if (isOwnBrowser && browser) {
         try {
             const pages = await browser.pages();
             for (const p of pages) {
                 await p.close().catch(() => {});
             }
         } catch (e) {}
-        await browser.close();
+        await browser.close().catch(() => {});
     }
   }
 }
