@@ -335,6 +335,12 @@ async function runScraper(nicho = null) {
         
         detailedData.permalink = finalLink;
         
+        if (!detailedData.title || detailedData.title.trim() === '') {
+            console.log("❌ Produto descartado: Não foi possível extrair o título (Provavelmente uma página genérica de promoção).");
+            await productTab.close();
+            continue;
+        }
+
         console.log(`🤖 Analisando oferta com a IA Groq: ${detailedData.title}...`);
         const avaliacaoIA = await avaliarOferta(detailedData, aprendizadoDiario);
         
