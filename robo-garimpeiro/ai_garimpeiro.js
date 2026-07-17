@@ -30,6 +30,9 @@ Se você identificar "Erros de precificação", "Cupons cumulativos", "Combinaç
 ## TREINAMENTO v3.9 - DIVERSIFICAÇÃO
 Ao classificar a categoria/nicho, seja EXATO com os filtros do painel.
 
+## TREINAMENTO v4.4 - CLASSIFICAÇÃO RIGOROSA DE ELETRÔNICOS
+Atenção: NÃO classifique itens como "Copos Térmicos", "Garrafas", "Ferramentas Manuais" ou utensílios de casa como "Eletrônicos", mesmo que tenham características técnicas. "Casa e Decoração" ou "Esportes" são mais apropriados.
+
 ${aprendizadoDiario ? '## 🚨 TREINAMENTO v4.0 - INTELIGÊNCIA DE AUTOEVOLUÇÃO (RELATÓRIO DE ONTEM)\\nLeia atentamente o relatório de desempenho abaixo e ajuste suas decisões de hoje:\\n' + aprendizadoDiario + '\\n---' : ''}
 
 # REGRAS E PONTUAÇÃO (SCORE 0-100)
