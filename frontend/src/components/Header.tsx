@@ -2,10 +2,25 @@
 
 import { Search } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
 
 export function Header() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const handleSearch = (term: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (term) {
+      params.set('q', term);
+    } else {
+      params.delete('q');
+    }
+    startTransition(() => {
+      router.push(`/?${params.toString()}`);
+    });
+  };
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#0a0a0a]/90 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-[1600px] items-center justify-between px-6">
@@ -21,12 +36,7 @@ export function Header() {
         <div className="hidden md:flex flex-1 items-center justify-center px-12">
           <form 
             className="relative w-full max-w-md"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const val = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
-              if (val) router.push(`/?q=${encodeURIComponent(val)}`);
-              else router.push('/');
-            }}
+            onSubmit={(e) => e.preventDefault()}
           >
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
               <Search className="h-4 w-4 text-zinc-500" />
@@ -34,6 +44,10 @@ export function Header() {
             <input
               type="text"
               name="search"
+              defaultValue={searchParams.get('q') || ''}
+              onChange={(e) => {
+                handleSearch(e.target.value);
+              }}
               className="block w-full rounded-full border-0 bg-[#141414] py-2.5 pl-11 pr-4 text-sm text-zinc-200 placeholder:text-zinc-500 focus:bg-[#1a1a1a] focus:ring-2 focus:ring-purple-500/50 transition-all"
               placeholder="Buscar ofertas..."
             />

@@ -19,7 +19,7 @@ export class ProductsService {
       whereClause.nicho = { contains: category, mode: 'insensitive' as const };
     }
     if (q) {
-      whereClause.nome = { contains: q, mode: 'insensitive' as const };
+      whereClause.titulo = { contains: q, mode: 'insensitive' as const };
     }
 
     return this.prisma.produto.findMany({
