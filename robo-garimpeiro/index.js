@@ -87,7 +87,11 @@ async function runScraper(nicho = null) {
     // Carregar histórico
     let history = [];
     if (fs.existsSync(HISTORY_FILE)) {
-      try { history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')); } catch (e) {}
+      try { 
+          const data = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')); 
+          // Suporte ao formato antigo (array de strings) e novo (array de objetos)
+          history = data.map(item => typeof item === 'string' ? { title: item, link: null } : item);
+      } catch (e) {}
     }
 
     // Procura todos os botões que contenham a palavra "Compartilhar"
@@ -165,8 +169,12 @@ async function runScraper(nicho = null) {
         }, currentButtons[currentIndex]);
 
         if (productInfo.title && productInfo.title !== "Oferta Imperdível") {
-            // Verificar no histórico
-            if (history.includes(productInfo.title)) {
+            // Verificar no histórico normalizando o texto para evitar duplicatas por pequenos erros
+            const normalize = (t) => t.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const normalizedTitle = normalize(productInfo.title);
+            
+            const alreadyPosted = history.find(h => h.title && normalize(h.title) === normalizedTitle);
+            if (alreadyPosted) {
                 console.log(`⏭️  Pulando: "${productInfo.title}" (já foi postado antes).`);
                 continue;
             }
@@ -230,6 +238,14 @@ async function runScraper(nicho = null) {
            console.log("❌ Falha crítica: O link não pôde ser gerado ou copiado.");
            await page.keyboard.press('Escape');
            continue;
+        }
+
+        // Verificação adicional de deduplicação pelo link gerado
+        const alreadyPostedLink = history.find(h => h.link === finalLink);
+        if (alreadyPostedLink) {
+             console.log(`⏭️  Pulando: Link de afiliado ${finalLink} já foi postado recentemente.`);
+             await page.keyboard.press('Escape');
+             continue;
         }
 
         console.log(`🔗 Link de Afiliado Capturado: ${finalLink}`);
@@ -330,14 +346,18 @@ async function runScraper(nicho = null) {
         } catch (e) {
             console.log("⚠️ Erro ao raspar página do produto, usando dados parciais.");
         } finally {
-            await productTab.close();
+            await productTab.close().catch(() => {});
         }
         
         detailedData.permalink = finalLink;
         
         if (!detailedData.title || detailedData.title.trim() === '') {
             console.log("❌ Produto descartado: Não foi possível extrair o título (Provavelmente uma página genérica de promoção).");
-            await productTab.close();
+            continue;
+        }
+
+        if (detailedData.discountPercentage !== undefined && detailedData.discountPercentage < 15) {
+            console.log(`❌ Produto descartado pela Trava de Segurança: Desconto muito baixo (${detailedData.discountPercentage}%). Mínimo exigido é 15%.`);
             continue;
         }
 
@@ -384,7 +404,7 @@ async function runScraper(nicho = null) {
         
         // Salva no histórico para não repetir
         if (productInfo.title && productInfo.title !== "Oferta Imperdível") {
-           history.push(productInfo.title);
+           history.push({ title: productInfo.title, link: finalLink });
         }
         
         // Fechar o modal
@@ -467,6 +487,9 @@ cron.schedule('15 2 * * *', () => {
 
 // A execução imediata foi desativada para manter a fidelidade aos horários da estratégia.
 console.log('⏳ O Robô está em sentinela aguardando o próximo horário agendado...');
+// Executando agora mesmo para teste forçado a pedido do usuário
+console.log('🚀 Iniciando varredura imediata de teste...');
+runScraper();
 
 // ============================================================================
 // LABORATORY QUEUE POLLING
