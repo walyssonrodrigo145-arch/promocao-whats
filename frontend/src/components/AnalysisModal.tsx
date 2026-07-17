@@ -9,6 +9,9 @@ interface AnalysisModalProps {
 export function AnalysisModal({ analysis, isOpen, onClose }: AnalysisModalProps) {
   if (!isOpen || !analysis) return null;
 
+  const getArray = (val: any) => Array.isArray(val) ? val : (val ? [val] : []);
+  const getJoined = (val: any) => Array.isArray(val) ? val.join(', ') : (val || '');
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
@@ -58,7 +61,7 @@ export function AnalysisModal({ analysis, isOpen, onClose }: AnalysisModalProps)
                 <Target className="w-4 h-4 text-rose-400" /> Dores do Cliente Resolvidas
               </h3>
               <ul className="space-y-2">
-                {analysis.dores_resolvidas?.map((dor: string, i: number) => (
+                {getArray(analysis.dores_resolvidas).map((dor: string, i: number) => (
                   <li key={i} className="text-sm text-zinc-300 flex items-start gap-2 bg-rose-500/5 p-3 rounded-lg border border-rose-500/10">
                     <span className="text-rose-400 shrink-0">❖</span>
                     {dor}
@@ -74,14 +77,14 @@ export function AnalysisModal({ analysis, isOpen, onClose }: AnalysisModalProps)
                 <div>
                   <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Perfis</span>
                   <div className="flex flex-wrap gap-2 mt-1.5">
-                    {analysis.publico_alvo?.map((p: string, i: number) => (
+                    {getArray(analysis.publico_alvo).map((p: string, i: number) => (
                       <span key={i} className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-md">{p}</span>
                     ))}
                   </div>
                 </div>
                 <div>
                   <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Intenção de Compra</span>
-                  <p className="text-sm text-zinc-300 mt-1">{analysis.intencao_compra?.join(', ')}</p>
+                  <p className="text-sm text-zinc-300 mt-1">{getJoined(analysis.intencao_compra)}</p>
                 </div>
               </div>
             </div>
@@ -94,7 +97,7 @@ export function AnalysisModal({ analysis, isOpen, onClose }: AnalysisModalProps)
                 <Zap className="w-4 h-4 text-yellow-400" /> Gatilhos Mentais
               </h3>
               <div className="flex flex-wrap gap-2">
-                {analysis.gatilhos?.map((g: string, i: number) => (
+                {getArray(analysis.gatilhos).map((g: string, i: number) => (
                   <span key={i} className="px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-sm rounded-lg font-medium">
                     {g}
                   </span>
@@ -106,7 +109,7 @@ export function AnalysisModal({ analysis, isOpen, onClose }: AnalysisModalProps)
                 <TrendingUp className="w-4 h-4 text-emerald-400" /> Palavras de Impacto
               </h3>
               <div className="flex flex-wrap gap-2">
-                {analysis.palavras_impacto?.map((p: string, i: number) => (
+                {getArray(analysis.palavras_impacto).map((p: string, i: number) => (
                   <span key={i} className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-lg font-medium">
                     {p}
                   </span>
