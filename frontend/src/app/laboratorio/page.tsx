@@ -23,7 +23,7 @@ export default function Laboratorio() {
     setStatusMessage("Enviando tarefa para o Robô Garimpeiro...");
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://76.13.228.159:3000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://wrpromo.shop/api";
       
       const reqRes = await fetch(`${apiUrl}/collector/laboratory/analyze-request`, {
         method: "POST",
@@ -73,7 +73,7 @@ export default function Laboratorio() {
     setPublishing(true);
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://76.13.228.159:3000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://wrpromo.shop/api";
       const res = await fetch(`${apiUrl}/collector/laboratory/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
