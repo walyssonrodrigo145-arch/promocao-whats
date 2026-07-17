@@ -453,9 +453,14 @@ cron.schedule('30 20 * * *', () => {
   runScraper("Eletrônicos, Smartphones, TVs e Informática");
 });
 
-// TESTE IMEDIATO
-console.log('🚀 Iniciando varredura de TESTE IMEDIATO (Nichos Mistos)...');
-runScraper("Eletrônicos"); // Pode mudar aqui para testar outros nichos agora
+// 5. 02:15 - A "Madrugada (Caçador de Bugs/Relâmpagos)"
+cron.schedule('15 2 * * *', () => {
+  console.log('⏰ Horário Estratégico (02:15) - Iniciando o Corujão (Bugs e Relâmpagos)');
+  runScraper(); // Sem nicho específico, foca 100% em descontos malucos e erros de preço de madrugada
+});
+
+// A execução imediata foi desativada para manter a fidelidade aos horários da estratégia.
+console.log('⏳ O Robô está em sentinela aguardando o próximo horário agendado...');
 
 // ============================================================================
 // LABORATORY QUEUE POLLING
