@@ -12,7 +12,7 @@ const HISTORY_FILE = './historico_produtos.json';
 let isRunning = false;
 let globalBrowser = null;
 
-async function runScraper(nicho = null) {
+async function runScraper(nicho = null, discountThreshold = 15) {
   if (isRunning) {
     console.log('⏳ O robô já está em execução no momento. Pulando este ciclo.');
     return;
@@ -356,8 +356,8 @@ async function runScraper(nicho = null) {
             continue;
         }
 
-        if (detailedData.discountPercentage !== undefined && detailedData.discountPercentage < 15) {
-            console.log(`❌ Produto descartado pela Trava de Segurança: Desconto muito baixo (${detailedData.discountPercentage}%). Mínimo exigido é 15%.`);
+        if (detailedData.discountPercentage !== undefined && detailedData.discountPercentage < discountThreshold) {
+            console.log(`❌ Produto descartado pela Trava de Segurança: Desconto muito baixo (${detailedData.discountPercentage}%). Mínimo exigido é ${discountThreshold}%.`);
             continue;
         }
 
@@ -483,6 +483,12 @@ cron.schedule('30 20 * * *', () => {
 cron.schedule('15 2 * * *', () => {
   console.log('⏰ Horário Estratégico (02:15) - Iniciando o Corujão (Bugs e Relâmpagos)');
   runScraper(); // Sem nicho específico, foca 100% em descontos malucos e erros de preço de madrugada
+});
+
+// 6. MODO SNIPER (De hora em hora)
+cron.schedule('0 * * * *', () => {
+  console.log('🎯 MODO SNIPER ATIVADO - Buscando super ofertas e bugs de preço (>50% OFF)');
+  runScraper(null, 50); // Mínimo de 50% de desconto
 });
 
 // A execução imediata foi desativada para manter a fidelidade aos horários da estratégia.
