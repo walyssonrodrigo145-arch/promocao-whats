@@ -229,10 +229,17 @@ export default function Laboratorio() {
               </div>
 
               {/* Ações */}
-              <div className="mt-8 pt-6 border-t border-white/5 flex gap-4">
+              <div className="mt-8 pt-6 border-t border-white/5 flex gap-4 flex-wrap">
+                <button
+                  onClick={() => alert(JSON.stringify(analysis, null, 2))}
+                  className="px-6 py-3 rounded-xl border border-purple-500/30 text-purple-400 font-semibold hover:bg-purple-500/10 transition-colors flex items-center gap-2 text-sm"
+                >
+                  <TrendingUp className="w-4 h-4" /> Ver Relatório Bruto (JSON)
+                </button>
+                <div className="flex-1"></div>
                 <button
                   onClick={() => setAnalysis(null)}
-                  className="px-6 py-3 rounded-xl border border-white/10 text-white font-semibold hover:bg-white/5 transition-colors flex items-center gap-2"
+                  className="px-6 py-3 rounded-xl border border-white/10 text-white font-semibold hover:bg-white/5 transition-colors flex items-center gap-2 text-sm"
                 >
                   <X className="w-4 h-4" /> Descartar
                 </button>
