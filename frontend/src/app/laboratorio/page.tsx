@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Search, Loader2, Send, X, ShieldAlert, Zap, Target, TrendingUp } from "lucide-react";
+import { AnalysisModal } from '@/components/AnalysisModal';
 
 export default function Laboratorio() {
   const [url, setUrl] = useState("");
@@ -10,6 +11,7 @@ export default function Laboratorio() {
   const [analysis, setAnalysis] = useState<any>(null);
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -231,10 +233,10 @@ export default function Laboratorio() {
               {/* Ações */}
               <div className="mt-8 pt-6 border-t border-white/5 flex gap-4 flex-wrap">
                 <button
-                  onClick={() => alert(JSON.stringify(analysis, null, 2))}
+                  onClick={() => setShowModal(true)}
                   className="px-6 py-3 rounded-xl border border-purple-500/30 text-purple-400 font-semibold hover:bg-purple-500/10 transition-colors flex items-center gap-2 text-sm"
                 >
-                  <TrendingUp className="w-4 h-4" /> Ver Relatório Bruto (JSON)
+                  <TrendingUp className="w-4 h-4" /> Relatório Detalhado da IA
                 </button>
                 <div className="flex-1"></div>
                 <button
@@ -267,6 +269,13 @@ export default function Laboratorio() {
           </div>
         )}
       </main>
+
+      {/* Modal de Inteligência */}
+      <AnalysisModal 
+        analysis={analysis} 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)} 
+      />
     </div>
   );
 }
