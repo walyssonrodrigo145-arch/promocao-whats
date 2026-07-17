@@ -438,8 +438,10 @@ cron.schedule('46 15 * * *', () => {
 // Verifica a cada 5 segundos se a equipe enviou algum link lá no painel da VPS
 // ============================================================================
 
+let isLaboratoryRunning = false;
+
 async function pollLaboratoryTasks() {
-  if (isRunning) return; // Não interrompe se o garimpo estiver rodando
+  if (isLaboratoryRunning) return; // Trava independente apenas para o laboratório
 
   try {
     const res = await fetch('https://promo.wrmusicpro.com.br/collector/laboratory/pending-tasks');
@@ -447,10 +449,10 @@ async function pollLaboratoryTasks() {
     const { task } = await res.json();
     
     if (task && task.id) {
-       console.log(`\n🛎️ [LABORATÓRIO] Nova tarefa recebida da equipe! URL: ${task.url}`);
-       isRunning = true;
+       console.log(`\n🛎️ [LABORATÓRIO PRIORIDADE MÁXIMA] Nova tarefa recebida! Processando imediatamente: ${task.url}`);
+       isLaboratoryRunning = true;
        await processLaboratoryTask(task);
-       isRunning = false;
+       isLaboratoryRunning = false;
     }
   } catch (e) {
     // Falhas de rede na verificação silenciosa são ignoradas
