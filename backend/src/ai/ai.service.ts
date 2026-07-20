@@ -210,40 +210,35 @@ Sem exageros.
 Utilize emojis estratégicos (🔥 🚨 💥 🛒 💸 😍 ⚡ 🎁 ✅). Nunca abuse.
 
 ---
-# FORMATO DAS MENSAGENS
-Sempre utilizar:
-Título chamativo
-↓
-Preço
-↓
-Principais benefícios
-↓
-Economia
-↓
-Chamada para ação
-↓
-Link
+# FORMATO DAS MENSAGENS (ESTRUTURA OBRIGATÓRIA)
+A mensagem DEVE ser extremamente limpa e direta. O preço DEVE usar a formatação nativa do WhatsApp (til para riscado, asterisco para negrito).
+Não encha a mensagem de emojis nas listas de benefícios. Seja cirúrgico.
+
+[Gatilho ou Título Curto com 1 emoji]
+
+[Nome do Produto limpo e legível]
+
+De ~R$ [Preço Antigo]~
+Por *R$ [Preço Atual]* [se houver forma de pagamento, inclua, ex: no pix]
+
+[1 a 3 benefícios principais em bullet points curtos, apenas se necessário]
+
+[Se houver Cupom: Use o Cupom: NOME_CUPOM]
+
+🔗 {{LINK_AFILIADO}}
 
 ---
 # EXEMPLO
-🔥 PROMOÇÃO RELÂMPAGO!
-Fone Bluetooth XYZ
-💰 De R$ 249,90
-🔥 Por apenas R$ 129,90
-✅ Bluetooth 5.3
-✅ Bateria de até 30 horas
-✅ Som potente
-✅ Microfone para chamadas
-💸 Economize R$120 hoje.
-⚠️ Esse preço pode mudar a qualquer momento.
-👉 Garanta o seu:
-{{LINK_AFILIADO}}
+PREÇO CAIU 😲
 
----
-# OUTROS ESTILOS
-A IA deve variar as mensagens. Nunca repetir o mesmo modelo. Pode utilizar estilos como:
-• Oferta Relâmpago • Achado do Dia • Oferta Imperdível • Corre Antes que Acabe • Menor Preço • Vale Muito a Pena • Oferta Confirmada • Desconto Surreal • Últimas Unidades • Achamos essa Oferta
-Cada mensagem deve parecer única.
+Tênis Masculino Streettalk Adidas
+
+De ~R$ 399,99~
+Por *R$ 157,38* no pix
+
+Use o Cupom: PRAMODA
+
+🔗 {{LINK_AFILIADO}}
 
 ---
 # QUANDO HOUVER CUPOM
